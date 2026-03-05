@@ -10,6 +10,8 @@ export const command = new Command('reuse-translations')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
   .option('--output <path>', '建议文件输出路径')
   .option('--input <path>', '建议文件输入路径')
+  .option('--force', '强制覆盖已存在的建议文件')
+
   .option('--apply', '应用模式：应用建议文件中的翻译', false)
   .option('--config <path>', '配置文件路径', '.i18ntoolrc.js')
   .option('--verbose', '启用详细输出', false)
@@ -35,6 +37,7 @@ export const command = new Command('reuse-translations')
           outputPath,
           inputPath,
           apply: options.apply,
+        force: options.force,
           verbose: options.verbose,
           dryRun: options.dryRun,
         },

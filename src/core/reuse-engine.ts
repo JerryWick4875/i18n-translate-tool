@@ -236,6 +236,14 @@ export class ReuseEngine {
 
     // 写入建议文件
     if (!this.options.dryRun) {
+      // 检查文件是否存在
+      const fileExists = await this.fileExists(outputFilePath);
+      if (fileExists && !this.options.force) {
+        throw new Error(
+          `建议文件已存在: ${outputFilePath}\n使用 --force 强制覆盖`
+        );
+      }
+
       await this.writeSuggestionsFile(outputFilePath, data);
       this.logger.success(`\n✅ Suggestions written to ${outputFilePath}`);
     } else {
@@ -251,6 +259,18 @@ export class ReuseEngine {
   private async loadIgnoreValues(): Promise<string[]> {
     // 这里暂时返回默认值，实际应该从配置文件加载
     return ['(i18n-no-translate)', '-', 'TODO'];
+  }
+
+  /**
+   * 检查文件是否存在
+   */
+  private async fileExists(filePath: string): Promise<boolean> {
+    try {
+      await fs.access(filePath);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**

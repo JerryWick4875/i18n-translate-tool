@@ -98,6 +98,13 @@ function mergeConfig(
     defaultTargets: userConfig.defaultTargets ?? defaults.defaultTargets,
     scanPatterns: userConfig.scanPatterns || defaults.scanPatterns,
 
+    // 输出格式配置
+    outputFormat: {
+      quotingType: userConfig.outputFormat?.quotingType || defaults.outputFormat?.quotingType,
+      forceQuotes: userConfig.outputFormat?.forceQuotes ?? defaults.outputFormat?.forceQuotes,
+      indent: userConfig.outputFormat?.indent || defaults.outputFormat?.indent,
+    },
+
     // 快照配置
     snapshot: {
       dir: userConfig.snapshot?.dir || defaults.snapshot?.dir,
@@ -108,6 +115,12 @@ function mergeConfig(
     reuseTranslations: {
       outputFile: userConfig.reuseTranslations?.outputFile || defaults.reuseTranslations?.outputFile,
       ignoreValues: userConfig.reuseTranslations?.ignoreValues ?? defaults.reuseTranslations?.ignoreValues,
+    },
+
+    // 提交配置
+    submission: {
+      outputDir: userConfig.submission?.outputDir || defaults.submission?.outputDir,
+      gitlab: userConfig.submission?.gitlab || defaults.submission?.gitlab,
     },
   };
 }

@@ -33,3 +33,6 @@ yarn-error.log*
 # Testing
 coverage/
 .nyc_output/
+
+# Test outputs
+src/__tests__/**/output/

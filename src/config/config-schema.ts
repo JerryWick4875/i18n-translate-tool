@@ -1,6 +1,15 @@
 import { z } from 'zod';
 
 /**
+ * 输出格式配置 Schema
+ */
+const OutputFormatConfigSchema = z.object({
+  quotingType: z.literal("'").or(z.literal('"')).optional(),
+  forceQuotes: z.boolean().optional(),
+  indent: z.number().int().positive().optional(),
+}).strict();
+
+/**
  * 快照配置 Schema
  */
 const SnapshotConfigSchema = z.object({
@@ -17,6 +26,19 @@ const ReuseTranslationsConfigSchema = z.object({
 }).strict();
 
 /**
+ * 提交配置 Schema
+ */
+const SubmissionConfigSchema = z.object({
+  outputDir: z.string().min(1).optional(),
+  gitlab: z.object({
+    url: z.string().url(),
+    project: z.string().min(1),
+    token: z.string().min(1),
+    basePath: z.string().optional(),
+  }).optional(),
+}).strict();
+
+/**
  * 配置校验 Schema
  */
 export const I18nConfigSchema = z.object({
@@ -26,8 +48,10 @@ export const I18nConfigSchema = z.object({
   scanPatterns: z.array(z.string()).min(1),
 
   // 功能配置
+  outputFormat: OutputFormatConfigSchema.optional(),
   snapshot: SnapshotConfigSchema.optional(),
   reuseTranslations: ReuseTranslationsConfigSchema.optional(),
+  submission: SubmissionConfigSchema.optional(),
 }).strict();
 
 export type I18nConfigInput = z.infer<typeof I18nConfigSchema>;

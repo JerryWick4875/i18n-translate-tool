@@ -4,6 +4,7 @@ import { program } from 'commander';
 import * as snapshot from './commands/snapshot';
 import * as sync from './commands/sync';
 import * as reuseTranslations from './commands/reuse-translations';
+import * as submit from './commands/submit';
 
 program
   .name('i18n-translate-tool')
@@ -14,5 +15,6 @@ program
 program.addCommand(snapshot.command);
 program.addCommand(sync.command);
 program.addCommand(reuseTranslations.command);
+program.addCommand(submit.command);
 
 program.parse();

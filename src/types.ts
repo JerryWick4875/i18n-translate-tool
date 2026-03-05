@@ -4,6 +4,13 @@ export interface I18nConfig {
   defaultTargets?: string[];
   scanPatterns: string[];
 
+  // 输出格式配置（所有功能共用）
+  outputFormat?: {
+    quotingType?: string;
+    forceQuotes?: boolean;
+    indent?: number;
+  };
+
   // 快照功能配置
   snapshot?: {
     dir?: string;
@@ -14,6 +21,17 @@ export interface I18nConfig {
   reuseTranslations?: {
     outputFile?: string;
     ignoreValues?: string[];
+  };
+
+  // 提交功能配置
+  submission?: {
+    outputDir?: string;
+    gitlab?: {
+      url: string;
+      project: string;
+      token: string;
+      basePath?: string;
+    };
   };
 }
 
@@ -46,6 +64,7 @@ export interface SyncOptions {
   basePath: string;
   filter?: string;
   verbose?: boolean;
+  force?: boolean;
   dryRun?: boolean;
 }
 
@@ -105,6 +124,7 @@ export interface ReuseTranslationOptions {
   inputPath?: string;
   apply?: boolean;
   verbose?: boolean;
+  force?: boolean;
   dryRun?: boolean;
 }
 
@@ -116,4 +136,62 @@ export interface ReuseTranslationResult {
   skippedCount: number;
   multipleMatchesCount: number;
   fileCount: number;
+}
+
+/**
+ * 提交选项
+ */
+export interface SubmissionOptions {
+  target: string;
+  basePath: string;
+  filter?: string;
+  force?: boolean;
+  apply?: boolean;
+  verbose?: boolean;
+}
+
+/**
+ * 提取结果
+ */
+export interface ExtractionResult {
+  fileCount: number;
+  entryCount: number;
+  files: ExtractedFile[];
+}
+
+/**
+ * 提取的文件
+ */
+export interface ExtractedFile {
+  relativePath: string;
+  baseLanguage: string;
+  targetLanguage: string;
+  entryCount: number;
+}
+
+/**
+ * GitLab 配置
+ */
+export interface GitLabConfig {
+  url: string;
+  project: string;
+  token: string;
+  basePath?: string;
+}
+
+/**
+ * 文件提交信息
+ */
+export interface FileCommit {
+  path: string;
+  content: string;
+}
+
+/**
+ * 提交结果
+ */
+export interface SubmissionResult {
+  extracted: ExtractionResult;
+  branchName?: string;
+  commitCount?: number;
 }
