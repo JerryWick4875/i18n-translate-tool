@@ -1,0 +1,32 @@
+// i18n-tool Configuration Example
+// Copy this file to .i18ntoolrc.js in your project root and customize as needed
+
+module.exports = {
+  // 扫描模式：使用命名通配符 (* as name) 来匹配本地化文件
+  // 目录结构示例: app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml
+  // - (* as app): 应用名称
+  // - (* as product): 产品/模块名称
+  // - (* as locale): 语言代码 (zh-CN, en-US 等)
+  // - *.yml: 翻译文件名 (common.yml, cart.yml 等)
+  scanPatterns: [
+    'app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml',
+  ],
+
+  // 快照存储目录（相对于项目根路径）
+  snapshotDir: '.i18n-snapshot',
+
+  // 快照文件路径模式（可选）
+  // 可用变量：从 scanPatterns 提取的变量（如 {app}, {product}），{target} - 目标语言
+  // 默认: '{app}/{target}.yml'
+  // 示例:
+  //   - '{app}/{product}/{target}.yml'  → .i18n-snapshot/shop/widget/en-US.yml
+  //   - '{product}/{app}/{target}.yml'  → .i18n-snapshot/widget/shop/en-US.yml
+  //   - '{app}/{target}.yml'          → .i18n-snapshot/shop/en-US.yml
+  snapshotPathPattern: '{app}/{product}/{target}.yml',
+
+  // 基础/源语言（默认: zh-CN）
+  baseLanguage: 'zh-CN',
+
+  // 默认目标语言（可选）
+  defaultTargets: ['en-US', 'ja-JP']
+};

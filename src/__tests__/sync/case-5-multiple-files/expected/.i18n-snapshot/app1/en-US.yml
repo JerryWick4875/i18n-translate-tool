@@ -1,0 +1,6 @@
+app/app1/config/locales/zh-CN/ui/locales.yml:
+  title: 标题
+  button: 按钮
+app/app1/config/locales/zh-CN/form/locales.yml:
+  username: 用户名
+  password: 密码

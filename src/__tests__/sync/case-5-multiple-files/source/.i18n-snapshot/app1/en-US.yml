@@ -1,0 +1,4 @@
+app/app1/config/locales/zh-CN/form/locales.yml:
+  username: 用户名
+app/app1/config/locales/zh-CN/ui/locales.yml:
+  title: 标题
