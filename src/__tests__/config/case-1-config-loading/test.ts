@@ -13,7 +13,7 @@ export async function run() {
   // Should use defaults since no config file exists
   if (
     result.scanPatterns.length === DEFAULT_CONFIG.scanPatterns.length &&
-    result.snapshotDir === DEFAULT_CONFIG.snapshotDir &&
+    result.snapshot?.dir === DEFAULT_CONFIG.snapshot?.dir &&
     result.baseLanguage === DEFAULT_CONFIG.baseLanguage
   ) {
     console.log(`✅ ${testName} passed`);

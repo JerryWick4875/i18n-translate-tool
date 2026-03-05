@@ -1,0 +1,32 @@
+# i18n-tool 翻译复用建议文件
+# 生成时间: 2026-03-05T10:00:00Z
+# 目标语言: en-US
+#
+# 使用说明:
+# - value 字段: 直接填充此翻译
+# - suggestions 字段: 从多个选项中选择一个填入 value 字段
+# - 留空 value: 跳过此项翻译
+
+generatedAt: "2026-03-05T10:00:00Z"
+locale: "en-US"
+
+items:
+  # 文件: app/shop1/config/locales/en-US/cart.yml
+  # 基础值: 提交订单
+  - file: "app/shop1/config/locales/en-US/cart.yml"
+    key: "checkout"
+    baseValue: "提交订单"
+    # 多个匹配选项，请选择一个:
+    suggestions:
+      - value: "Submit Order"
+        source: "app/shop1/config/locales/en-US/ui.yml"
+        sourceKey: "button"
+      - value: "Place Order"
+        source: "app/shop1/config/locales/en-US/form.yml"
+        sourceKey: "submit"
+  # 文件: app/shop1/config/locales/en-US/cart.yml
+  # 基础值: 页面标题
+  - file: "app/shop1/config/locales/en-US/cart.yml"
+    key: "title"
+    baseValue: "页面标题"
+    value: "Page Title"

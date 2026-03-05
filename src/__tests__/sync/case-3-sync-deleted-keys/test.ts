@@ -28,7 +28,7 @@ export async function run() {
       logger
     );
 
-    const snapshotDir = path.join(tempDir, '.i18n-snapshot');
+    const snapshotDir = path.join(tempDir, 'i18n-translate-snapshot');
     await syncEngine.sync(
       config.scanPatterns,
       snapshotDir,

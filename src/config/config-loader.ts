@@ -7,7 +7,7 @@ import { I18nConfigSchema } from './config-schema';
 /**
  * 配置文件名
  */
-const CONFIG_FILE_NAME = '.i18ntoolrc.js';
+const CONFIG_FILE_NAME = '.i18n-translate-tool-config.js';
 
 /**
  * 从项目目录加载配置
@@ -93,12 +93,22 @@ function mergeConfig(
   userConfig: Partial<I18nConfig>
 ): I18nConfig {
   return {
-    ...defaults,
-    ...userConfig,
-    scanPatterns: userConfig.scanPatterns || defaults.scanPatterns,
-    snapshotDir: userConfig.snapshotDir || defaults.snapshotDir,
+    // 基础配置
     baseLanguage: userConfig.baseLanguage || defaults.baseLanguage,
     defaultTargets: userConfig.defaultTargets ?? defaults.defaultTargets,
+    scanPatterns: userConfig.scanPatterns || defaults.scanPatterns,
+
+    // 快照配置
+    snapshot: {
+      dir: userConfig.snapshot?.dir || defaults.snapshot?.dir,
+      pathPattern: userConfig.snapshot?.pathPattern || defaults.snapshot?.pathPattern,
+    },
+
+    // 翻译复用配置
+    reuseTranslations: {
+      outputFile: userConfig.reuseTranslations?.outputFile || defaults.reuseTranslations?.outputFile,
+      ignoreValues: userConfig.reuseTranslations?.ignoreValues ?? defaults.reuseTranslations?.ignoreValues,
+    },
   };
 }
 
@@ -113,5 +123,6 @@ function validateConfig(config: I18nConfig): void {
  * 获取 snapshot 目录的绝对路径
  */
 export function getSnapshotDir(config: I18nConfig, basePath: string): string {
-  return path.resolve(basePath, config.snapshotDir);
+  const snapshotDir = config.snapshot?.dir || 'i18n-translate-snapshot';
+  return path.resolve(basePath, snapshotDir);
 }

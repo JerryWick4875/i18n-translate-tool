@@ -1,0 +1,16 @@
+# i18n-tool 翻译复用建议文件
+# 生成时间: 2026-03-05T10:00:00Z
+# 目标语言: en-US
+
+generatedAt: "2026-03-05T10:00:00Z"
+locale: "en-US"
+
+items:
+  - file: "app/shop1/config/locales/en-US/widget.yml"
+    key: "submitButton"
+    baseValue: "提交订单"
+    value: "Submit Order"
+  - file: "app/shop1/config/locales/en-US/widget.yml"
+    key: "cancelButton"
+    baseValue: "取消订单"
+    value: "Cancel Order"

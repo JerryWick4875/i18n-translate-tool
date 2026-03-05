@@ -49,8 +49,9 @@ export const command = new Command('snapshot')
         groups.get(group)!.push(file);
       }
 
-      const snapshotDir = path.join(basePath, config.snapshotDir);
-      const snapshotManager = new SnapshotManager(snapshotDir);
+      const snapshotDir = path.join(basePath, config.snapshot?.dir || 'i18n-translate-snapshot');
+      const pathPattern = config.snapshot?.pathPattern || '{app}/{target}.yml';
+      const snapshotManager = new SnapshotManager(snapshotDir, pathPattern);
 
       for (const [group, groupFiles] of groups) {
         logger.section(`\n📸 Creating snapshot for ${group}...`);

@@ -18,6 +18,14 @@ const TEST_GROUPS = {
     'case-6-product-structure',
     'case-7-filter-directory',
   ],
+  'reuse-translations': [
+    'case-1-unique-match',
+    'case-2-multiple-matches',
+    'case-3-apply-translations',
+    'case-4-ignore-values',
+    'case-5-one-time-mode',
+    'case-6-custom-output',
+  ],
 };
 
 export async function runAllTests() {

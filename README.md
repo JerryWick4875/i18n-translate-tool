@@ -1,4 +1,4 @@
-# i18n-tool
+# i18n-translate-tool
 
 i18n 翻译同步和快照工具，用于管理多语言 YAML 文件的同步和变更追踪。
 
@@ -7,6 +7,7 @@ i18n 翻译同步和快照工具，用于管理多语言 YAML 文件的同步和
 - 🔍 **智能扫描**：基于 glob 模式查找本地化文件
 - 📸 **快照管理**：创建基础语言快照作为同步基准
 - 🔄 **变更同步**：自动检测新增、修改、删除的翻译键
+- 🔄 **翻译复用**：自动查找并复用相同中文内容的现有翻译
 - 🎯 **灵活过滤**：支持按目录路径过滤处理范围
 - ✅ **类型安全**：使用 TypeScript + Zod 进行配置校验
 
@@ -22,7 +23,7 @@ npm link  # 可选：全局安装
 
 ### 1. 创建配置文件
 
-在项目根目录创建 `.i18ntoolrc.js`：
+在项目根目录创建 `.i18n-translate-tool-config.js`：
 
 ```javascript
 module.exports = {
@@ -31,11 +32,13 @@ module.exports = {
     'app/(* as app)/config/locales/(* as locale)/*.yml',
   ],
 
-  // 快照存储目录
-  snapshotDir: '.i18n-snapshot',
-
   // 基础/源语言
   baseLanguage: 'zh-CN',
+
+  // 快照配置
+  snapshot: {
+    dir: 'i18n-translate-snapshot',
+  },
 
   // 默认目标语言（可选）
   defaultTargets: ['en-US', 'ja-JP'],
@@ -58,16 +61,51 @@ app/
 ### 3. 创建快照
 
 ```bash
-i18n-tool snapshot --target=en-US
+i18n-translate-tool snapshot --target=en-US
 ```
 
 ### 4. 同步翻译
 
 ```bash
-i18n-tool sync --target=en-US
+i18n-translate-tool sync --target=en-US
+```
+
+### 5. 复用翻译（新功能）
+
+```bash
+# 生成翻译复用建议
+i18n-translate-tool reuse-translations --target=en-US
+
+# 一键应用唯一匹配的翻译
+i18n-translate-tool reuse-translations --apply --target=en-US
 ```
 
 ## 配置说明
+
+### 基础配置
+
+```javascript
+module.exports = {
+  // 基础配置（所有功能共用）
+  baseLanguage: 'zh-CN',
+  defaultTargets: ['en-US', 'ja-JP'],
+  scanPatterns: [
+    'app/(* as app)/config/locales/(* as locale)/*.yml',
+  ],
+
+  // 快照功能配置
+  snapshot: {
+    dir: 'i18n-translate-snapshot',
+    pathPattern: '{app}/{target}.yml',
+  },
+
+  // 翻译复用功能配置
+  reuseTranslations: {
+    outputFile: '.i18n-translate-tool-reuse.yml',
+    ignoreValues: ['(i18n-no-translate)', '-', 'TODO'],
+  },
+};
+```
 
 ### scanPatterns
 
@@ -90,30 +128,15 @@ scanPatterns: [
 - `(* as name)` - 捕获路径段并赋值给变量 `name`
 - 普通的 glob 通配符（`*`, `**`）也可以使用
 
-### snapshotDir
+### snapshot 配置
 
-快照文件存储目录（相对于项目根路径）。
+- `dir` - 快照文件存储目录（默认: `i18n-translate-snapshot`）
+- `pathPattern` - 快照文件路径模式，支持变量替换
 
-### snapshotPathPattern（可选）
+### reuseTranslations 配置
 
-快照文件路径模式，支持变量替换：
-
-```javascript
-snapshotPathPattern: '{app}/{product}/{target}.yml'
-```
-
-**可用变量：**
-- 从 scanPatterns 提取的变量（如 `{app}`, `{product}`）
-- `{target}` - 目标语言
-- `{language}` - 目标语言（同 `{target}`）
-
-### baseLanguage
-
-基础/源语言代码，开发者使用的语言。
-
-### defaultTargets（可选）
-
-默认目标语言列表，便于快速同步。
+- `outputFile` - 翻译复用建议文件路径（默认: `.i18n-translate-tool-reuse.yml`）
+- `ignoreValues` - 被视为"空值"的字符串列表
 
 ## 命令使用
 
@@ -122,13 +145,13 @@ snapshotPathPattern: '{app}/{product}/{target}.yml'
 创建基础语言的快照，用于后续同步的基准。
 
 ```bash
-i18n-tool snapshot [选项]
+i18n-translate-tool snapshot [选项]
 ```
 
 **选项：**
 - `--target <language>` - 目标语言代码（默认: en-US）
 - `--filter <path>` - 过滤到特定目录（如 app/shop）
-- `--config <path>` - 配置文件路径（默认: .i18ntoolrc.js）
+- `--config <path>` - 配置文件路径（默认: .i18n-translate-tool-config.js）
 - `--verbose` - 启用详细输出
 - `--dry-run` - 显示更改但不写入文件
 
@@ -136,13 +159,13 @@ i18n-tool snapshot [选项]
 
 ```bash
 # 为 en-US 创建快照
-i18n-tool snapshot --target=en-US
+i18n-translate-tool snapshot --target=en-US
 
 # 只处理 shop 应用
-i18n-tool snapshot --target=en-US --filter=app/shop
+i18n-translate-tool snapshot --target=en-US --filter=app/shop
 
 # 详细输出
-i18n-tool snapshot --target=en-US --verbose
+i18n-translate-tool snapshot --target=en-US --verbose
 ```
 
 ### sync - 同步翻译
@@ -150,13 +173,13 @@ i18n-tool snapshot --target=en-US --verbose
 将基础语言的变更同步到目标语言。
 
 ```bash
-i18n-tool sync [选项]
+i18n-translate-tool sync [选项]
 ```
 
 **选项：**
 - `--target <language>` - 目标语言代码（默认: en-US）
 - `--filter <path>` - 过滤到特定目录（如 app/shop）
-- `--config <path>` - 配置文件路径（默认: .i18ntoolrc.js）
+- `--config <path>` - 配置文件路径（默认: .i18n-translate-tool-config.js）
 - `--verbose` - 启用详细输出
 - `--dry-run` - 预览变更而不实际修改文件
 
@@ -164,16 +187,47 @@ i18n-tool sync [选项]
 
 ```bash
 # 同步到 en-US
-i18n-tool sync --target=en-US
+i18n-translate-tool sync --target=en-US
 
 # 只同步 shop 应用
-i18n-tool sync --target=en-US --filter=app/shop
+i18n-translate-tool sync --target=en-US --filter=app/shop
 
 # 预览变更
-i18n-tool sync --target=en-US --dry-run
+i18n-translate-tool sync --target=en-US --dry-run
+```
 
-# 详细输出
-i18n-tool sync --target=en-US --verbose
+### reuse-translations - 复用翻译
+
+自动查找并复用相同中文内容的现有翻译。
+
+```bash
+i18n-translate-tool reuse-translations [选项]
+```
+
+**选项：**
+- `--target <language>` - 目标语言代码（默认: en-US）
+- `--filter <path>` - 过滤到特定目录
+- `--output <path>` - 建议文件输出路径
+- `--input <path>` - 建议文件输入路径
+- `--apply` - 应用模式：应用建议文件中的翻译
+- `--verbose` - 启用详细输出
+- `--dry-run` - 显示更改但不写入文件
+
+**三种使用模式：**
+
+1. **生成模式** - 创建建议文件
+```bash
+i18n-translate-tool reuse-translations --target=en-US
+```
+
+2. **应用模式** - 从建议文件应用翻译
+```bash
+i18n-translate-tool reuse-translations --apply
+```
+
+3. **一键模式** - 生成并立即应用唯一匹配
+```bash
+i18n-translate-tool reuse-translations --apply --target=en-US
 ```
 
 ## 工作流程
@@ -184,17 +238,23 @@ i18n-tool sync --target=en-US --verbose
 
 2. **创建快照**：
    ```bash
-   i18n-tool snapshot --target=en-US
+   i18n-translate-tool snapshot --target=en-US
    ```
 
 3. **同步到目标语言**：
    ```bash
-   i18n-tool sync --target=en-US
+   i18n-translate-tool sync --target=en-US
    ```
 
-4. **翻译**：翻译人员根据同步结果填充空字符串
+4. **复用翻译**（可选）：
+   ```bash
+   # 自动填充相同中文内容的现有翻译
+   i18n-translate-tool reuse-translations --apply --target=en-US
+   ```
 
-5. **重复**：继续开发，重复步骤 1-4
+5. **翻译**：翻译人员填充剩余的空字符串
+
+6. **重复**：继续开发，重复步骤 1-5
 
 ### 同步行为说明
 
@@ -229,65 +289,29 @@ key1: ""
 # key1 也被删除
 ```
 
-## 配置示例
+### 翻译复用行为
 
-### 单层结构
+**唯一匹配** - 自动填充
+```yaml
+# zh-CN
+common.yml: title: "产品标题"
+widget.yml: title: ""  # 自动填充为 "Product Title"
 
-**目录结构：**
-```
-app/
-└── shop/
-    └── config/
-        └── locales/
-            ├── zh-CN/
-            │   └── locales.yml
-            └── en-US/
-                └── locales.yml
+# en-US
+common.yml: title: "Product Title"
 ```
 
-**配置：**
-```javascript
-module.exports = {
-  scanPatterns: [
-    'app/(* as app)/config/locales/(* as locale)/*.yml',
-  ],
-  snapshotDir: '.i18n-snapshot',
-  baseLanguage: 'zh-CN',
-};
-```
+**多个匹配** - 生成建议供用户选择
+```yaml
+# zh-CN
+ui.yml: button: "提交订单"
+form.yml: submit: "提交订单"
 
-### 产品模块结构
+# en-US
+ui.yml: button: "Submit Order"
+form.yml: submit: "Place Order"
 
-**目录结构：**
-```
-app/
-└── shop/
-    └── config/
-        └── products/
-            ├── user/
-            │   └── locales/
-            │       ├── zh-CN/
-            │       │   └── common.yml
-            │       └── en-US/
-            │           └── common.yml
-            └── order/
-                └── locales/
-                    ├── zh-CN/
-                    │   └── common.yml
-                    └── en-US/
-                        └── common.yml
-```
-
-**配置：**
-```javascript
-module.exports = {
-  scanPatterns: [
-    'app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml',
-  ],
-  snapshotDir: '.i18n-snapshot',
-  snapshotPathPattern: '{app}/{product}/{target}.yml',
-  baseLanguage: 'zh-CN',
-};
+# 建议：选择 "Submit Order" 或 "Place Order"
 ```
 
 ## 测试
@@ -308,6 +332,11 @@ npm test
 - ✅ 多文件同步
 - ✅ 产品结构同步
 - ✅ 目录过滤
+- ✅ 翻译复用（唯一匹配）
+- ✅ 翻译复用（多个匹配）
+- ✅ 翻译复用（应用翻译）
+- ✅ 翻译复用（忽略值）
+- ✅ 翻译复用（一键模式）
 - ✅ 配置错误处理
 
 ## 常见问题
@@ -316,19 +345,19 @@ npm test
 
 使用 `--filter` 选项：
 ```bash
-i18n-tool sync --target=en-US --filter=app/shop
+i18n-translate-tool sync --target=en-US --filter=app/shop
 ```
 
 ### Q: 如何预览将要做的变更？
 
 使用 `--dry-run` 选项：
 ```bash
-i18n-tool sync --target=en-US --dry-run
+i18n-translate-tool sync --target=en-US --dry-run
 ```
 
 ### Q: 快照文件存储在哪里？
 
-默认存储在 `.i18n-snapshot` 目录中，可通过配置的 `snapshotDir` 修改。
+默认存储在 `i18n-translate-snapshot` 目录中，可通过配置修改。
 
 ### Q: 如何处理多个产品模块？
 
@@ -343,10 +372,17 @@ scanPatterns: [
 
 检查配置文件是否满足以下要求：
 - `scanPatterns` 必须是非空数组
-- `snapshotDir` 必须是非空字符串
 - `baseLanguage` 必须是非空字符串
+- 配置文件名必须为 `.i18n-translate-tool-config.js`
 
 错误消息会指出具体的问题字段。
+
+### Q: 翻译复用功能如何工作？
+
+工具会扫描所有目标语言文件，查找相同中文内容的现有翻译：
+- 如果只有一个翻译，自动填充
+- 如果有多个翻译，生成建议供你选择
+- 支持自定义忽略值列表（如 TODO、- 等）
 
 ## 许可证
 

@@ -41,14 +41,14 @@ export async function run() {
 
     // Create snapshot
     const snapshotManager = new SnapshotManager(
-      path.join(tempDir, '.i18n-snapshot')
+      path.join(tempDir, 'i18n-translate-snapshot')
     );
     await snapshotManager.createSnapshot('app1', 'en-US', baseData);
 
     // Verify: Compare temp with expected
     const result = await compareDirs(
-      path.join(tempDir, '.i18n-snapshot'),
-      path.join(expectedDir, '.i18n-snapshot')
+      path.join(tempDir, 'i18n-translate-snapshot'),
+      path.join(expectedDir, 'i18n-translate-snapshot')
     );
 
     if (result) {

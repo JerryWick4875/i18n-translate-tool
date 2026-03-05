@@ -33,7 +33,7 @@ export async function run() {
       logger
     );
 
-    const snapshotDir = path.join(tempDir, '.i18n-snapshot');
+    const snapshotDir = path.join(tempDir, 'i18n-translate-snapshot');
     await syncEngine.sync(
       config.scanPatterns,
       snapshotDir,
@@ -48,8 +48,8 @@ export async function run() {
 
     // Also verify snapshot
     const snapshotResult = await compareDirs(
-      path.join(tempDir, '.i18n-snapshot'),
-      path.join(expectedDir, '.i18n-snapshot')
+      path.join(tempDir, 'i18n-translate-snapshot'),
+      path.join(expectedDir, 'i18n-translate-snapshot')
     );
 
     if (result && snapshotResult) {

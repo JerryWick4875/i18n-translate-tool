@@ -1,10 +1,10 @@
 {
-  "name": "i18n-tool",
+  "name": "i18n-translate-tool",
   "version": "1.0.0",
   "description": "i18n translation sync and snapshot tool",
   "main": "dist/index.js",
   "bin": {
-    "i18n-tool": "dist/index.js"
+    "i18n-translate-tool": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",

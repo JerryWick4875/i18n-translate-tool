@@ -29,11 +29,11 @@ export const command = new Command('sync')
           verbose: options.verbose,
           dryRun: options.dryRun,
         },
-        config.snapshotPathPattern || '{app}/{target}.yml',
+        config.snapshot?.pathPattern || '{app}/{target}.yml',
         logger
       );
 
-      const snapshotDir = path.join(basePath, config.snapshotDir);
+      const snapshotDir = path.join(basePath, config.snapshot?.dir || 'i18n-translate-snapshot');
 
       const result = await syncEngine.sync(
         config.scanPatterns,
