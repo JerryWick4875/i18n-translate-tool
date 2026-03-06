@@ -26,6 +26,10 @@ export interface I18nConfig {
   // 提交功能配置
   submission?: {
     outputDir?: string;
+    deduplication?: {
+      enabled?: boolean;
+      mappingFileName?: string;
+    };
     gitlab?: {
       url: string;
       project: string;
@@ -139,6 +143,43 @@ export interface ReuseTranslationResult {
 }
 
 /**
+ * 键位置信息
+ */
+export interface KeyLocation {
+  file: string;
+  key: string;
+}
+
+/**
+ * 翻译映射文件结构
+ */
+export interface TranslationMapping {
+  version: string;
+  generatedAt: string;
+  mappings: MappingEntry[];
+}
+
+/**
+ * 单个映射条目
+ */
+export interface MappingEntry {
+  uniqueId: string;
+  baseValue: string;
+  primaryKey: KeyLocation;
+  otherKeys: KeyLocation[];
+}
+
+/**
+ * 去重条目（提交阶段）
+ */
+export interface DedupedEntry {
+  uniqueId: string;
+  baseValue: string;
+  primaryKey: KeyLocation;
+  otherKeys: KeyLocation[];
+}
+
+/**
  * 提交选项
  */
 export interface SubmissionOptions {
@@ -148,6 +189,7 @@ export interface SubmissionOptions {
   force?: boolean;
   apply?: boolean;
   verbose?: boolean;
+  deduplication?: boolean;
 }
 
 /**
@@ -194,4 +236,53 @@ export interface SubmissionResult {
   extracted: ExtractionResult;
   branchName?: string;
   commitCount?: number;
+}
+
+/**
+ * 拉取选项
+ */
+export interface PullOptions {
+  branch: string;
+  target: string;
+  basePath: string;
+  filter?: string;
+  dryRun?: boolean;
+  force?: boolean;
+  verbose?: boolean;
+}
+
+/**
+ * 拉取结果
+ */
+export interface PullResult {
+  filledCount: number;
+  skippedCount: number;
+  fileCount: number;
+  skippedEntries: SkippedEntry[];
+}
+
+/**
+ * 跳过的词条
+ */
+export interface SkippedEntry {
+  filePath: string;
+  key: string;
+  reason: string;
+}
+
+/**
+ * 验证结果
+ */
+export interface ValidationResult {
+  isValid: boolean;
+  reason?: string;
+}
+
+/**
+ * 远程文件
+ */
+export interface RemoteFile {
+  path: string;
+  content: Record<string, string>;
+  language: string;
 }

@@ -142,7 +142,11 @@ export class GitLabClient {
   /**
    * 准备提交的文件列表
    */
-  static async prepareFiles(outputDir: string, basePath?: string): Promise<FileCommit[]> {
+  static async prepareFiles(
+    outputDir: string,
+    basePath?: string,
+    mappingFileName?: string
+  ): Promise<{ files: FileCommit[]; mappingFile?: FileCommit }> {
     const { glob } = await import('glob');
     const { join, relative } = await import('path');
 
@@ -150,9 +154,22 @@ export class GitLabClient {
     const files = await glob(pattern, { absolute: true });
 
     const commits: FileCommit[] = [];
+    let mappingFileCommit: FileCommit | undefined;
+
     for (const file of files) {
       const content = await this.readFileContent(file);
       let relativePath = relative(outputDir, file);
+
+      // 检查是否是映射文件
+      const fileName = join('/', relativePath).split('/').pop();
+      if (mappingFileName && fileName === mappingFileName) {
+        // 映射文件放在仓库根目录
+        mappingFileCommit = {
+          path: mappingFileName,
+          content,
+        };
+        continue;
+      }
 
       // 去掉第一层的语言目录（zh-CN 或 en-US）
       const pathParts = relativePath.split('/');
@@ -174,6 +191,6 @@ export class GitLabClient {
       });
     }
 
-    return commits;
+    return { files: commits, mappingFile: mappingFileCommit };
   }
 }

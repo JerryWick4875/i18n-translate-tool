@@ -26,14 +26,23 @@ const ReuseTranslationsConfigSchema = z.object({
 }).strict();
 
 /**
+ * 去重配置 Schema
+ */
+const DeduplicationConfigSchema = z.object({
+  enabled: z.boolean().optional(),
+  mappingFileName: z.string().min(1).optional(),
+}).strict();
+
+/**
  * 提交配置 Schema
  */
 const SubmissionConfigSchema = z.object({
   outputDir: z.string().min(1).optional(),
+  deduplication: DeduplicationConfigSchema.optional(),
   gitlab: z.object({
     url: z.string().url(),
     project: z.string().min(1),
-    token: z.string().min(1),
+    token: z.string(),
     basePath: z.string().optional(),
   }).optional(),
 }).strict();

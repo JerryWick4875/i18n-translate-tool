@@ -11,6 +11,8 @@ import {
   ExtractedFile,
   LocaleFile,
 } from '../types';
+import { DeduplicationCollector } from './deduplication-collector';
+import { MappingFileGenerator } from './mapping-file-generator';
 
 /**
  * 提取未翻译条目的配置
@@ -36,11 +38,13 @@ export class SubmissionExtractor {
   private logger: Logger;
   private config: I18nConfig;
   private filter?: string;
+  private deduplication?: boolean;
 
   constructor(options: SubmissionOptions, config: I18nConfig, logger: Logger) {
     this.config = config;
     this.logger = logger;
     this.filter = options.filter;
+    this.deduplication = options.deduplication;
     this.scanner = new LocaleScanner(options.basePath, config.scanPatterns);
     this.yamlHandler = new YamlHandler();
   }
@@ -71,9 +75,8 @@ export class SubmissionExtractor {
     // 按应用和语言分组
     const groups = this.scanner.groupByAppAndLanguage(loadedFiles);
 
-    // 提取未翻译的条目
-    const extractedFiles: ExtractedFile[] = [];
-    let totalEntryCount = 0;
+    // 收集所有未翻译的条目（不立即写入）
+    const allUntranslatedEntries = new Map<string, Map<string, string>>();
 
     for (const group of groups) {
       this.logger.verboseLog(`\n处理应用: ${group.app}`);
@@ -104,37 +107,73 @@ export class SubmissionExtractor {
           continue;
         }
 
-        this.logger.verboseLog(`    处理: ${targetFile.relativePath} (${untranslatedEntries.size} 个未翻译条目)`);
+        this.logger.verboseLog(`    收集: ${targetFile.relativePath} (${untranslatedEntries.size} 个未翻译条目)`);
 
-        // 创建输出文件路径
-        const baseOutputPath = path.join(outputDir, baseLanguage, baseFile.relativePath);
-        const targetOutputPath = path.join(outputDir, targetLanguage, targetFile.relativePath);
-
-        // 确保输出目录存在
-        await ensureDir(path.dirname(baseOutputPath));
-        await ensureDir(path.dirname(targetOutputPath));
-
-        // 写入基础语言文件（仅包含未翻译的条目）
-        const baseContent = Object.fromEntries(untranslatedEntries);
-        await this.yamlHandler.writeFile(baseOutputPath, baseContent);
-
-        // 写入目标语言文件（空值）
-        const targetContent: Record<string, string> = {};
-        for (const key of untranslatedEntries.keys()) {
-          targetContent[key] = '';
-        }
-        await this.yamlHandler.writeFile(targetOutputPath, targetContent);
-
-        // 记录提取的文件
-        extractedFiles.push({
-          relativePath: targetFile.relativePath,
-          baseLanguage,
-          targetLanguage,
-          entryCount: untranslatedEntries.size,
-        });
-
-        totalEntryCount += untranslatedEntries.size;
+        // 收集条目（暂不写入）
+        allUntranslatedEntries.set(targetFile.relativePath, untranslatedEntries);
       }
+    }
+
+    // 应用去重（如果启用）
+    let finalEntries = allUntranslatedEntries;
+    let dedupedEntries: any[] | undefined;
+
+    if (this.deduplication && allUntranslatedEntries.size > 0) {
+      const collector = new DeduplicationCollector(this.logger);
+      dedupedEntries = collector.collect(allUntranslatedEntries);
+
+      // 转换回文件格式（只包含主键）
+      finalEntries = this.convertDedupedToFiles(dedupedEntries);
+    }
+
+    // 写入文件
+    const extractedFiles: ExtractedFile[] = [];
+    let totalEntryCount = 0;
+
+    for (const [filePath, entries] of finalEntries.entries()) {
+      if (entries.size === 0) {
+        continue; // 跳过空文件
+      }
+
+      // 创建输出文件路径
+      const baseOutputPath = path.join(outputDir, baseLanguage, filePath);
+      const targetOutputPath = path.join(outputDir, targetLanguage, filePath);
+
+      // 确保输出目录存在
+      await ensureDir(path.dirname(baseOutputPath));
+      await ensureDir(path.dirname(targetOutputPath));
+
+      // 写入基础语言文件
+      const baseContent = Object.fromEntries(entries);
+      await this.yamlHandler.writeFile(baseOutputPath, baseContent);
+
+      // 写入目标语言文件（空值）
+      const targetContent: Record<string, string> = {};
+      for (const key of entries.keys()) {
+        targetContent[key] = '';
+      }
+      await this.yamlHandler.writeFile(targetOutputPath, targetContent);
+
+      // 记录提取的文件
+      extractedFiles.push({
+        relativePath: filePath,
+        baseLanguage,
+        targetLanguage,
+        entryCount: entries.size,
+      });
+
+      totalEntryCount += entries.size;
+    }
+
+    // 写入映射文件（如果启用去重）
+    if (this.deduplication && dedupedEntries && dedupedEntries.length > 0) {
+      const mappingFileName = this.config.submission?.deduplication?.mappingFileName || '_translation-mapping.yml';
+      const mappingFilePath = path.join(outputDir, baseLanguage, mappingFileName);
+      const mapping = new DeduplicationCollector(this.logger).generateMapping(dedupedEntries);
+
+      const generator = new MappingFileGenerator(this.logger);
+      await generator.writeFile(mappingFilePath, mapping);
+      generator.logSummary(mapping);
     }
 
     this.logger.success(`\n✅ 提取完成: ${extractedFiles.length} 个文件, ${totalEntryCount} 个词条`);
@@ -144,6 +183,28 @@ export class SubmissionExtractor {
       entryCount: totalEntryCount,
       files: extractedFiles,
     };
+  }
+
+  /**
+   * 将去重后的条目转换回文件格式
+   */
+  private convertDedupedToFiles(dedupedEntries: any[]): Map<string, Map<string, string>> {
+    const files = new Map<string, Map<string, string>>();
+
+    for (const entry of dedupedEntries) {
+      // 只使用主键
+      const filePath = entry.primaryKey.file;
+      const key = entry.primaryKey.key;
+      const baseValue = entry.baseValue;
+
+      if (!files.has(filePath)) {
+        files.set(filePath, new Map());
+      }
+
+      files.get(filePath)!.set(key, baseValue);
+    }
+
+    return files;
   }
 
   /**

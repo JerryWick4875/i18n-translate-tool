@@ -26,6 +26,14 @@ const TEST_GROUPS = {
     'case-5-one-time-mode',
     'case-6-custom-output',
   ],
+  submit: [
+    'case-2-submit-deduplication',
+    'case-3-submit-no-deduplication',
+  ],
+  pull: [
+    'case-1-pull-basic',
+    'case-2-pull-deduplication',
+  ],
 };
 
 export async function runAllTests() {

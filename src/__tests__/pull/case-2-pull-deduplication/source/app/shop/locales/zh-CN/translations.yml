@@ -1,0 +1,14 @@
+# 商品相关翻译
+product.title: "商品标题"
+product.name: "商品名称"
+product.price: "价格"
+
+# 购物车相关翻译
+cart.title: "商品标题"
+cart.empty: "购物车为空"
+cart.checkout: "去结算"
+
+# 订单相关翻译
+order.title: "商品标题"
+order.status: "订单状态"
+order.total: "订单总额"

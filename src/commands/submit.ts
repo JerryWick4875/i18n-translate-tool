@@ -13,18 +13,23 @@ export const command = new Command('submit')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
   .option('--force', '强制覆盖已存在的输出目录')
   .option('--apply', '提取后提交到 GitLab')
+  .option('--dedup', '启用去重功能（相同文案只提交一次）')
+  .option('--no-dedup', '禁用去重功能')
   .option('--config <path>', '配置文件路径', '.i18ntoolrc.js')
   .option('--verbose', '启用详细输出', false)
   .action(async (options) => {
     try {
       const logger = new Logger(options.verbose, false);
-      const cwd = process.cwd();
+
+      // 解析配置文件路径
+      const configPath = path.resolve(options.config);
+      const configDir = path.dirname(configPath);
 
       logger.section('\n🚀 i18n-tool submit');
 
       // 加载配置
-      const config = await loadConfig(cwd);
-      const basePath = cwd;
+      const config = await loadConfigFromPath(configPath);
+      const basePath = configDir;
 
       // 获取输出目录
       const outputDir = path.join(
@@ -46,6 +51,7 @@ export const command = new Command('submit')
             basePath,
             filter: options.filter,
             verbose: options.verbose,
+            deduplication: options.dedup ?? config.submission?.deduplication?.enabled ?? false,
           },
           config,
           logger
@@ -83,6 +89,7 @@ export const command = new Command('submit')
               basePath,
               filter: options.filter,
               verbose: options.verbose,
+              deduplication: options.dedup ?? config.submission?.deduplication?.enabled ?? false,
             },
             config,
             logger
@@ -150,16 +157,26 @@ export const command = new Command('submit')
 
       // 准备文件
       logger.section('\n📁 准备文件...');
-      const files = await GitLabClient.prepareFiles(outputDir, gitlabConfig.basePath);
-      logger.info(`找到 ${files.length} 个文件`);
+      const mappingFileName = config.submission?.deduplication?.mappingFileName || '_translation-mapping.yml';
+      const { files, mappingFile } = await GitLabClient.prepareFiles(outputDir, gitlabConfig.basePath, mappingFileName);
 
-      if (files.length === 0) {
+      logger.info(`找到 ${files.length} 个文件`);
+      if (mappingFile) {
+        logger.info(`映射文件: ${mappingFile.path}`);
+      }
+
+      if (files.length === 0 && !mappingFile) {
         logger.warn('没有文件可提交');
         return;
       }
 
       // 提交文件
-      const commitCount = await gitlabClient.commitFiles(files, branchName);
+      let allFiles = [...files];
+      if (mappingFile) {
+        allFiles = [...files, mappingFile];
+      }
+
+      const commitCount = await gitlabClient.commitFiles(allFiles, branchName);
 
       logger.section('\n✅ 提交完成');
       logger.info(`分支: ${branchName}`);
@@ -173,3 +190,20 @@ export const command = new Command('submit')
       process.exit(1);
     }
   });
+
+/**
+ * 从指定路径加载配置
+ */
+async function loadConfigFromPath(configPath: string): Promise<any> {
+  try {
+    // 清除 require 缓存以允许重新加载
+    delete require.cache[require.resolve(configPath)];
+    const module = await import(configPath);
+    return module.default || module;
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Failed to load config from ${configPath}: ${error.message}`);
+    }
+    throw error;
+  }
+}

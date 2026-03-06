@@ -1,0 +1,5 @@
+cart.title: "商品标题"
+product.price: "价格"
+cart.checkout: "去结算"
+order.status: "订单状态"
+order.total: "订单总额"

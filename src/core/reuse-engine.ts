@@ -139,7 +139,7 @@ export class ReuseEngine {
     outputPath?: string
   ): Promise<ReuseSuggestionsData> {
     const targetLanguage = this.options.target;
-    const outputFilePath = outputPath || this.options.outputPath || '.i18ntool-reuse.yml';
+    const outputFilePath = this.resolveOutputPath(outputPath || this.options.outputPath || '.i18ntool-reuse.yml');
 
     this.logger.section(`\n🔍 Scanning for empty translations in ${targetLanguage}...`);
 
@@ -251,6 +251,17 @@ export class ReuseEngine {
     }
 
     return data;
+  }
+
+  /**
+   * 解析输出路径为绝对路径
+   * 如果是相对路径，则相对于 basePath
+   */
+  private resolveOutputPath(outputPath: string): string {
+    if (path.isAbsolute(outputPath)) {
+      return outputPath;
+    }
+    return path.resolve(this.options.basePath, outputPath);
   }
 
   /**
