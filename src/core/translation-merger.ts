@@ -4,6 +4,7 @@ import { LocaleFile, MappingEntry } from '../types';
 import * as path from 'path';
 import { LocaleScanner } from './scanner';
 import { I18nConfig } from '../types';
+import { normalizePath } from '../utils/file-utils';
 
 /**
  * 翻译合并器
@@ -158,7 +159,7 @@ export class TranslationMerger {
 
       for (const [key, translatedValue] of translations.entries()) {
         // 查找映射
-        const mappingKey = `${localTargetFile.relativePath}:${key}`;
+        const mappingKey = `${normalizePath(localTargetFile.relativePath)}:${key}`;
         const mapping = mappingLookup.get(mappingKey);
 
         if (!mapping) {
@@ -199,8 +200,8 @@ export class TranslationMerger {
       const loadedFiles = await this.yamlHandler.loadFiles(allFiles);
 
       for (const [filePath, translations] of otherKeysToUpdate.entries()) {
-        // 查找对应的本地文件
-        const localFile = loadedFiles.find(f => f.relativePath === filePath);
+        // 查找对应的本地文件（需要规范化路径进行比较）
+        const localFile = loadedFiles.find(f => normalizePath(f.relativePath) === normalizePath(filePath));
 
         if (!localFile) {
           this.logger.warn(`  ⚠ 本地文件不存在: ${filePath}`);
@@ -256,8 +257,11 @@ export class TranslationMerger {
     }
 
     try {
+      // 规范化路径（处理 Windows 路径分隔符）
+      const normalizedFilePath = normalizePath(filePath);
+
       // 首先尝试直接读取文件（可能是目标语言文件）
-      let fullPath = path.join(this.basePath, filePath);
+      let fullPath = path.join(this.basePath, normalizedFilePath);
       let content = await this.yamlHandler.loadFile(fullPath);
 
       // 如果键存在且值不为空，返回该值
@@ -267,7 +271,7 @@ export class TranslationMerger {
 
       // 如果直接读取失败或值为空，尝试将语言代码替换为基础语言代码
       // 例如：app/shop/locales/en-US/translations.yml -> app/shop/locales/zh-CN/translations.yml
-      const pathParts = filePath.split('/');
+      const pathParts = normalizedFilePath.split('/');
       for (let i = 0; i < pathParts.length; i++) {
         const part = pathParts[i];
         // 检查是否是语言代码（包含连字符的通常是语言代码，如 en-US, zh-CN）

@@ -2,6 +2,7 @@ import * as yaml from 'js-yaml';
 import * as fs from 'fs/promises';
 import { TranslationMapping, MappingEntry } from '../types';
 import { Logger } from '../utils/logger';
+import { normalizePath } from '../utils/file-utils';
 
 /**
  * 映射文件加载器
@@ -90,10 +91,14 @@ export class MappingLoader {
 
   /**
    * 根据主键位置查找映射条目
+   * 路径比较时会规范化为正斜杠（跨平台兼容）
    */
   findByPrimaryKey(mapping: TranslationMapping, file: string, key: string): MappingEntry | undefined {
+    const normalizedFile = normalizePath(file);
+
     for (const entry of mapping.mappings) {
-      if (entry.primaryKey.file === file && entry.primaryKey.key === key) {
+      const entryFile = normalizePath(entry.primaryKey.file);
+      if (entryFile === normalizedFile && entry.primaryKey.key === key) {
         return entry;
       }
     }

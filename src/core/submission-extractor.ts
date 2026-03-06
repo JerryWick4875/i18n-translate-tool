@@ -3,7 +3,7 @@ import * as fs from 'fs/promises';
 import { LocaleScanner } from './scanner';
 import { YamlHandler } from './yaml-handler';
 import { Logger } from '../utils/logger';
-import { ensureDir } from '../utils/file-utils';
+import { ensureDir, normalizePath } from '../utils/file-utils';
 import {
   I18nConfig,
   SubmissionOptions,
@@ -245,8 +245,8 @@ export class SubmissionExtractor {
       // 检查目录结构是否匹配（通过比较去除语言代码后的路径）
       // 例如：app/shop/config/products/widget/locales/en-US
       //       应该匹配 app/shop/config/products/widget/locales/zh-CN
-      const targetPathParts = targetDir.split('/');
-      const basePathParts = baseDir.split('/');
+      const targetPathParts = normalizePath(targetDir).split('/');
+      const basePathParts = normalizePath(baseDir).split('/');
 
       // 如果路径长度相同，且除了语言代码部分外都相同，则匹配
       if (targetPathParts.length === basePathParts.length) {

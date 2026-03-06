@@ -11,6 +11,7 @@ import {
   TranslationMapping,
   MappingEntry,
 } from '../types';
+import { normalizePath } from '../utils/file-utils';
 
 /**
  * 翻译验证器
@@ -215,8 +216,9 @@ export class TranslationValidator {
     const lookup = new Map<string, MappingEntry>();
 
     for (const entry of mapping.mappings) {
-      // 使用 "file:key" 格式创建索引
-      const key = `${entry.primaryKey.file}:${entry.primaryKey.key}`;
+      // 使用 "file:key" 格式创建索引，规范化路径
+      const normalizedFile = normalizePath(entry.primaryKey.file);
+      const key = `${normalizedFile}:${entry.primaryKey.key}`;
       lookup.set(key, entry);
     }
 
@@ -231,7 +233,8 @@ export class TranslationValidator {
     file: string,
     key: string
   ): MappingEntry | undefined {
-    return lookup.get(`${file}:${key}`);
+    const normalizedFile = normalizePath(file);
+    return lookup.get(`${normalizedFile}:${key}`);
   }
 
   /**
@@ -260,22 +263,23 @@ export class TranslationValidator {
    */
   private findMatchingLocalFile(remoteFile: RemoteFile, localFiles: LocaleFile[]): LocaleFile | undefined {
     // 提取远程文件的路径结构
-    const remotePath = remoteFile.path;
+    const remotePath = normalizePath(remoteFile.path);
     const remoteLanguage = remoteFile.language;
 
     return localFiles.find(f => {
       // 构建期望的本地文件路径：将远程路径中的语言代码替换为本地文件的语言代码
       const localLanguage = f.language;
+      const localPath = normalizePath(f.relativePath);
 
       // 如果语言代码不同，尝试在路径中替换
       if (remoteLanguage !== localLanguage) {
         // 将远程路径中的语言代码替换为本地语言代码
         const expectedPath = remotePath.replace(`/${remoteLanguage}/`, `/${localLanguage}/`);
-        return f.relativePath === expectedPath;
+        return localPath === expectedPath;
       }
 
       // 如果语言代码相同，直接比较路径
-      return f.relativePath === remotePath;
+      return localPath === remotePath;
     });
   }
 
@@ -287,18 +291,19 @@ export class TranslationValidator {
     baseFiles: RemoteFile[]
   ): RemoteFile | undefined {
     const targetLanguage = targetFile.language;
-    const targetPath = targetFile.path;
+    const targetPath = normalizePath(targetFile.path);
 
     return baseFiles.find(f => {
       const baseLanguage = f.language;
+      const basePath = normalizePath(f.path);
 
       // 如果语言代码不同，尝试在路径中替换
       if (targetLanguage !== baseLanguage) {
         const expectedPath = targetPath.replace(`/${targetLanguage}/`, `/${baseLanguage}/`);
-        return f.path === expectedPath;
+        return basePath === expectedPath;
       }
 
-      return f.path === targetPath;
+      return basePath === targetPath;
     });
   }
 

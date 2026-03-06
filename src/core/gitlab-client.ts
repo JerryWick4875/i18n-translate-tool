@@ -1,6 +1,7 @@
 import { Gitlab } from '@gitbeaker/rest';
 import { Logger } from '../utils/logger';
 import { GitLabConfig, FileCommit } from '../types';
+import { normalizePath } from '../utils/file-utils';
 
 /**
  * GitLab 客户端
@@ -160,8 +161,11 @@ export class GitLabClient {
       const content = await this.readFileContent(file);
       let relativePath = relative(outputDir, file);
 
+      // 规范化路径为正斜杠（跨平台兼容）
+      relativePath = normalizePath(relativePath);
+
       // 检查是否是映射文件
-      const fileName = join('/', relativePath).split('/').pop();
+      const fileName = relativePath.split('/').pop();
       if (mappingFileName && fileName === mappingFileName) {
         // 映射文件放在仓库根目录
         mappingFileCommit = {
@@ -179,11 +183,8 @@ export class GitLabClient {
 
       // 如果指定了 basePath，将其添加到文件路径
       if (basePath) {
-        relativePath = join(basePath, relativePath);
+        relativePath = normalizePath(join(basePath, relativePath));
       }
-
-      // 标准化路径分隔符
-      relativePath = relativePath.replace(/\\/g, '/');
 
       commits.push({
         path: relativePath,

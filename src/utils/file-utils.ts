@@ -1,18 +1,22 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import slash from 'slash';
 
 /**
  * 基于扫描模式从文件路径中提取应用名称
  * 假设应用名称是模式中第一个通配符，如 app-STAR-config
  */
 export function extractAppName(filePath: string, patterns: string[]): string {
+  // 先规范化路径
+  const normalizedPath = normalizePath(filePath);
+
   for (const pattern of patterns) {
     const parts = pattern.split('*');
     if (parts.length >= 2) {
       const before = parts[0];
-      const beforeIndex = filePath.indexOf(before);
+      const beforeIndex = normalizedPath.indexOf(before);
       if (beforeIndex !== -1) {
-        const afterPath = filePath.substring(beforeIndex + before.length);
+        const afterPath = normalizedPath.substring(beforeIndex + before.length);
         const slashIndex = afterPath.indexOf('/');
         if (slashIndex !== -1) {
           return afterPath.substring(0, slashIndex);
@@ -21,7 +25,6 @@ export function extractAppName(filePath: string, patterns: string[]): string {
     }
   }
 
-  const normalizedPath = filePath.replace(/\\/g, '/');
   const appMatch = normalizedPath.match(/\/app\/([^/]+)\//);
   if (appMatch) {
     return appMatch[1];
@@ -57,10 +60,11 @@ export async function ensureDir(dirPath: string): Promise<void> {
 }
 
 /**
- * 将路径分隔符标准化为正斜杠
+ * 将路径分隔符标准化为正斜杠（跨平台兼容）
+ * 使用 slash 库处理 Windows/Linux 路径差异
  */
 export function normalizePath(filePath: string): string {
-  return filePath.replace(/\\/g, '/');
+  return slash(filePath);
 }
 
 /**
