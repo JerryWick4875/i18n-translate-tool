@@ -90,22 +90,34 @@ export class SyncEngine {
 
       const variables = baseFiles[0]?.variables || {};
 
+      // 读取快照用于识别修改的词条（新增/删除直接对比源文件和目标文件）
       const snapshot = await this.snapshotManager.readSnapshot(app, this.options.target, variables);
 
       const currentData = this.prepareCurrentData(baseFiles);
 
-      const diff = this.diffEngine.compare(snapshot, currentData);
+      // 对比基础语言和目标语言文件，计算新增和删除
+      const fileChangesMap = this.calculateFileChanges(baseFiles, targetFiles, baseLanguage);
 
-      if (!this.diffEngine.hasChanges(diff)) {
-        this.logger.info('No changes detected');
-        continue;
-      }
+      // 使用快照识别修改的词条
+      const changedKeys = this.calculateChangedKeys(snapshot, currentData);
+
+      let hasAnyChanges = false;
 
       for (const baseFile of baseFiles) {
-        const fileChanges = this.diffEngine.getFileChanges(
-          diff,
-          baseFile.relativePath
-        );
+        const relativePath = baseFile.relativePath;
+        const fileChanges = fileChangesMap.get(relativePath);
+
+        if (!fileChanges) {
+          continue;
+        }
+
+        // 合并修改的词条（来自快照对比）
+        const fileChanged = changedKeys.get(relativePath);
+        if (fileChanged) {
+          for (const [key, change] of fileChanged) {
+            fileChanges.changed.set(key, change);
+          }
+        }
 
         if (
           fileChanges.added.size === 0 &&
@@ -114,6 +126,8 @@ export class SyncEngine {
         ) {
           continue;
         }
+
+        hasAnyChanges = true;
 
         const targetFile = targetFiles.find(
           f => f.relativePath === baseFile.relativePath.replace(baseLanguage, this.options.target)
@@ -132,6 +146,11 @@ export class SyncEngine {
         result.deletedCount += fileChanges.deleted.size;
       }
 
+      if (!hasAnyChanges) {
+        this.logger.info('No changes detected');
+      }
+
+      // 无论是否有变化，都更新快照以反映当前基础语言的完整状态
       if (!this.options.dryRun) {
         await this.snapshotManager.createSnapshot(
           app,
@@ -139,9 +158,90 @@ export class SyncEngine {
           this.prepareSnapshotMap(baseFiles),
           variables
         );
+        this.logger.success(`Snapshot updated.`);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * 对比基础语言和目标语言文件，计算新增和删除的词条
+   * 不依赖快照，直接对比两个文件的内容
+   */
+  private calculateFileChanges(
+    baseFiles: LocaleFile[],
+    targetFiles: LocaleFile[],
+    baseLanguage: string
+  ): Map<string, { added: Map<string, string>; changed: Map<string, { old: string; new: string }>; deleted: Set<string> }> {
+    const result = new Map<string, { added: Map<string, string>; changed: Map<string, { old: string; new: string }>; deleted: Set<string> }>();
+
+    for (const baseFile of baseFiles) {
+      const targetFile = targetFiles.find(
+        f => f.relativePath === baseFile.relativePath.replace(baseLanguage, this.options.target)
+      );
+
+      const baseKeys = new Set(Object.keys(baseFile.content));
+      const targetKeys = targetFile ? new Set(Object.keys(targetFile.content)) : new Set<string>();
+
+      const added = new Map<string, string>();
+      const deleted = new Set<string>();
+
+      // 新增：基础语言有，目标语言没有
+      for (const key of baseKeys) {
+        if (!targetKeys.has(key)) {
+          added.set(key, baseFile.content[key]);
+        }
       }
 
-      this.logger.success(`Snapshot updated.`);
+      // 删除：目标语言有，基础语言没有
+      for (const key of targetKeys) {
+        if (!baseKeys.has(key)) {
+          deleted.add(key);
+        }
+      }
+
+      result.set(baseFile.relativePath, {
+        added,
+        changed: new Map(), // 修改单独计算
+        deleted,
+      });
+    }
+
+    return result;
+  }
+
+  /**
+   * 使用快照识别修改的词条
+   * 修改 = 快照中有，且当前值与快照值不同
+   */
+  private calculateChangedKeys(
+    snapshotData: SnapshotData | null,
+    currentData: SnapshotData
+  ): Map<string, Map<string, { old: string; new: string }>> {
+    const result = new Map<string, Map<string, { old: string; new: string }>>();
+
+    if (!snapshotData) {
+      return result;
+    }
+
+    for (const [filePath, currentContent] of Object.entries(currentData)) {
+      const snapshotContent = snapshotData[filePath];
+      if (!snapshotContent) {
+        continue;
+      }
+
+      const changed = new Map<string, { old: string; new: string }>();
+
+      for (const [key, newValue] of Object.entries(currentContent)) {
+        if (key in snapshotContent && snapshotContent[key] !== newValue) {
+          changed.set(key, { old: snapshotContent[key], new: newValue });
+        }
+      }
+
+      if (changed.size > 0) {
+        result.set(filePath, changed);
+      }
     }
 
     return result;
