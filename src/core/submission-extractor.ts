@@ -251,11 +251,20 @@ export class SubmissionExtractor {
       // 如果路径长度相同，且除了语言代码部分外都相同，则匹配
       if (targetPathParts.length === basePathParts.length) {
         for (let i = 0; i < targetPathParts.length; i++) {
-          // 如果是语言代码部分（通常包含连字符），跳过比较
-          if (i === targetPathParts.length - 1) {
-            continue;
-          }
+          // 如果路径部分不同
           if (targetPathParts[i] !== basePathParts[i]) {
+            // 检查是否可能是语言代码（格式如：en, zh, en-US, zh-Hans）
+            // 语言代码格式：2个字母，可选后跟 - 和更多字母
+            const langCodePattern = /^[a-zA-Z]{2}(-[a-zA-Z]+)?$/;
+            const targetLooksLikeLang = langCodePattern.test(targetPathParts[i]);
+            const baseLooksLikeLang = langCodePattern.test(basePathParts[i]);
+
+            // 如果两边都看起来像语言代码，则跳过比较（认为是语言代码差异）
+            if (targetLooksLikeLang && baseLooksLikeLang) {
+              continue;
+            }
+
+            // 否则认为不匹配
             return false;
           }
         }

@@ -2,7 +2,7 @@ import * as path from 'path';
 import { glob } from 'glob';
 import { minimatch } from 'minimatch';
 import { LocaleFile, LocaleGroup } from '../types';
-import { extractLanguage, getRelativePath, normalizePath } from '../utils/file-utils';
+import { getRelativePath, normalizePath } from '../utils/file-utils';
 
 /**
  * 带命名通配符信息的解析模式
@@ -128,12 +128,19 @@ export class LocaleScanner {
 
   /**
    * 从文件路径创建 LocaleFile 对象
+   * 要求扫描模式必须包含 (* as locale) 变量来指定语言代码
    */
   private createLocaleFile(filePath: string): LocaleFile | null {
     const { app, variables } = this.extractVariables(filePath);
 
-    // 从变量中提取语言（如 {locale}）或回退到文件名
-    let language = variables['locale'] || variables['language'] || extractLanguage(filePath);
+    // 语言代码必须从 locale 变量中提取
+    const language = variables['locale'];
+    if (!language) {
+      throw new Error(
+        `Scan pattern must include "(* as locale)" to specify language code. ` +
+        `File: ${filePath}`
+      );
+    }
 
     const relativePath = getRelativePath(filePath, this.basePath);
 

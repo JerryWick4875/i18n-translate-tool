@@ -1,6 +1,6 @@
 module.exports = {
   baseLanguage: 'zh-CN',
-  scanPatterns: ['app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml'],
+  scanPatterns: ['app/(* as app)/config/products/(* as product)/locales/(* as locale)/*/*.yml'],
   snapshot: {
     dir: 'i18n-translate-snapshot',
     pathPattern: '{app}/{product}/{target}.yml',

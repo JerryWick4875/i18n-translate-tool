@@ -23,7 +23,7 @@ export async function run() {
   // 设置测试配置
   const config: I18nConfig = {
     baseLanguage: 'zh-CN',
-    scanPatterns: ['app/(* as app)/locales/(* as locale)/*.yml'],
+    scanPatterns: ['app/(* as app)/locales/(* as locale)/*/*.yml'],
   };
 
   const logger = new Logger(true);
@@ -97,6 +97,12 @@ async function prepareTestData(testDir: string): Promise<void> {
   await fs.mkdir(path.join(testDir, 'app/shop/locales/zh-CN'), { recursive: true });
   await fs.mkdir(path.join(testDir, 'app/shop/locales/en-US'), { recursive: true });
 
+  // 创建目录
+  const zhDir = path.join(testDir, 'app/shop/locales/zh-CN/entries');
+  const enDir = path.join(testDir, 'app/shop/locales/en-US/entries');
+  await fs.mkdir(zhDir, { recursive: true });
+  await fs.mkdir(enDir, { recursive: true });
+
   // 写入基础语言文件
   const baseContent = {
     'product.name': '商品名称',
@@ -107,7 +113,7 @@ async function prepareTestData(testDir: string): Promise<void> {
   };
 
   await fs.writeFile(
-    path.join(testDir, 'app/shop/locales/zh-CN/translations.yml'),
+    path.join(zhDir, 'translations.yml'),
     Object.entries(baseContent)
       .map(([k, v]) => `${k}: "${v}"`)
       .join('\n')
@@ -123,7 +129,7 @@ async function prepareTestData(testDir: string): Promise<void> {
   };
 
   await fs.writeFile(
-    path.join(testDir, 'app/shop/locales/en-US/translations.yml'),
+    path.join(enDir, 'translations.yml'),
     Object.entries(targetContent)
       .map(([k, v]) => `${k}: "${v}"`)
       .join('\n')
@@ -140,7 +146,7 @@ function createMockRemoteFiles(): {
   // 模拟 GitLab 上的基础语言文件
   const baseFiles: RemoteFile[] = [
     {
-      path: 'app/shop/locales/zh-CN/translations.yml',
+      path: 'app/shop/locales/zh-CN/entries/translations.yml',
       content: {
         'product.name': '商品名称',
         'product.description': '商品描述',
@@ -155,7 +161,7 @@ function createMockRemoteFiles(): {
   // 模拟 GitLab 上的目标语言文件（翻译人员已翻译）
   const targetFiles: RemoteFile[] = [
     {
-      path: 'app/shop/locales/en-US/translations.yml',
+      path: 'app/shop/locales/en-US/entries/translations.yml',
       content: {
         'product.name': 'Product Name',
         'product.description': 'Product Description',
@@ -176,7 +182,7 @@ function createMockRemoteFiles(): {
 async function verifyResults(testDir: string): Promise<void> {
   // 读取实际结果
   const actualContent = await fs.readFile(
-    path.join(testDir, 'app/shop/locales/en-US/translations.yml'),
+    path.join(testDir, 'app/shop/locales/en-US/entries/translations.yml'),
     'utf-8'
   );
 

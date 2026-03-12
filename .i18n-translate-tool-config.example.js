@@ -10,8 +10,16 @@ module.exports = {
   defaultTargets: ['en-US', 'ja-JP'],
 
   // 扫描模式 - 支持通配符和变量捕获
+  // 必须包含 (* as locale) 来指定语言代码位置
   scanPatterns: [
-    'app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml',
+    // 示例：单层结构（语言代码直接在 locales/ 下）
+    // 'app/(* as app)/config/locales/(* as locale)/*.yml',
+
+    // 示例：嵌套结构（语言代码后有子目录）
+    'app/(* as app)/config/locales/(* as locale)/*/*.yml',
+
+    // 示例：多变量（app + product + locale）
+    // 'app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml',
   ],
 
   // ==================== 快照功能配置 ====================

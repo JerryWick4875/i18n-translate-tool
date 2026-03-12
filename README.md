@@ -28,6 +28,7 @@ npm link  # 可选：全局安装
 ```javascript
 module.exports = {
   // 扫描模式：支持命名通配符 (* as name)
+  // 必须包含 (* as locale) 来指定语言代码位置
   scanPatterns: [
     'app/(* as app)/config/locales/(* as locale)/*.yml',
   ],
@@ -90,7 +91,8 @@ module.exports = {
   baseLanguage: 'zh-CN',
   defaultTargets: ['en-US', 'ja-JP'],
   scanPatterns: [
-    'app/(* as app)/config/locales/(* as locale)/*.yml',
+    // 必须包含 (* as locale) 指定语言代码位置
+    'app/(* as app)/config/locales/(* as locale)/*/*.yml',
   ],
 
   // 快照功能配置
@@ -119,14 +121,20 @@ scanPatterns: [
   // 嵌套结构
   'app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml',
 
-  // 多级嵌套
+  // 多级嵌套（语言代码后有子目录）
   'app/(* as app)/config/locales/(* as locale)/*/*.yml',
 ]
 ```
 
 **语法说明：**
+- `(* as locale)` - **必须**包含，用于指定语言代码位置
 - `(* as name)` - 捕获路径段并赋值给变量 `name`
 - 普通的 glob 通配符（`*`, `**`）也可以使用
+
+**重要：** `(* as locale)` 是必需的，工具依赖它来正确识别语言代码。如果配置中不包含 `(* as locale)`，会报错：
+```
+Scan pattern must include "(* as locale)" to specify language code.
+```
 
 ### snapshot 配置
 

@@ -30,16 +30,16 @@ export async function run() {
           uniqueId: 'abc123',
           baseValue: '商品标题',
           primaryKey: {
-            file: 'app/shop/locales/en-US/translations.yml',
+            file: 'app/shop/locales/en-US/entries/translations.yml',
             key: 'cart.title',  // 使用 cart.title 作为主键（字母排序）
           },
           otherKeys: [
             {
-              file: 'app/shop/locales/en-US/translations.yml',
+              file: 'app/shop/locales/en-US/entries/translations.yml',
               key: 'order.title',
             },
             {
-              file: 'app/shop/locales/en-US/translations.yml',
+              file: 'app/shop/locales/en-US/entries/translations.yml',
               key: 'product.title',
             },
           ],
@@ -51,7 +51,7 @@ export async function run() {
     const mockRemoteFiles = {
       baseFiles: [
         {
-          path: 'app/shop/locales/zh-CN/translations.yml',
+          path: 'app/shop/locales/zh-CN/entries/translations.yml',
           content: {
             'product.title': '商品标题',
             'product.name': '商品名称',
@@ -68,7 +68,7 @@ export async function run() {
       ],
       targetFiles: [
         {
-          path: 'app/shop/locales/en-US/translations.yml',
+          path: 'app/shop/locales/en-US/entries/translations.yml',
           content: {
             'cart.title': 'Product Title',  // 主键的翻译
             'product.price': 'Price',
@@ -127,11 +127,11 @@ export async function run() {
     // 验证结果
     const actualPath = path.join(
       tempDir,
-      'app/shop/locales/en-US/translations.yml'
+      'app/shop/locales/en-US/entries/translations.yml'
     );
     const expectedPath = path.join(
       expectedDir,
-      'app/shop/locales/en-US/translations.yml'
+      'app/shop/locales/en-US/entries/translations.yml'
     );
 
     const actualContent = await fs.readFile(actualPath, 'utf-8');

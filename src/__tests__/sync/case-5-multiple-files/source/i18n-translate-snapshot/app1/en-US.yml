@@ -1,4 +1,5 @@
-app/app1/config/locales/zh-CN/form/locales.yml:
+app/app1/config/locales/zh-CN/entries/form/locales.yml:
   username: 用户名
-app/app1/config/locales/zh-CN/ui/locales.yml:
+app/app1/config/locales/zh-CN/entries/ui/locales.yml:
   title: 标题
+  button: 按钮

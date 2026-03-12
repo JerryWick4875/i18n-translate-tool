@@ -34,10 +34,12 @@ export function extractAppName(filePath: string, patterns: string[]): string {
 }
 
 /**
- * 从文件名中提取语言代码
+ * 从文件名中提取语言代码（回退方法）
+ * 当扫描模式中没有 (* as locale) 时使用
+ * @deprecated 请使用 (* as locale) 在扫描模式中指定语言代码
  */
-export function extractLanguage(fileName: string): string {
-  const name = path.basename(fileName, path.extname(fileName));
+export function extractLanguage(filePath: string): string {
+  const name = path.basename(filePath, path.extname(filePath));
   return name;
 }
 
