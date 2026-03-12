@@ -135,9 +135,9 @@ export class SubmissionExtractor {
         continue; // 跳过空文件
       }
 
-      // 创建输出文件路径
-      const baseOutputPath = path.join(outputDir, baseLanguage, filePath);
-      const targetOutputPath = path.join(outputDir, targetLanguage, filePath);
+      // 创建输出文件路径（保持与项目结构一致，将目标语言替换为基础语言）
+      const baseOutputPath = path.join(outputDir, filePath.replace(targetLanguage, baseLanguage));
+      const targetOutputPath = path.join(outputDir, filePath);
 
       // 确保输出目录存在
       await ensureDir(path.dirname(baseOutputPath));
@@ -168,7 +168,7 @@ export class SubmissionExtractor {
     // 写入映射文件（如果启用去重）
     if (this.deduplication && dedupedEntries && dedupedEntries.length > 0) {
       const mappingFileName = this.config.submission?.deduplication?.mappingFileName || '_translation-mapping.yml';
-      const mappingFilePath = path.join(outputDir, baseLanguage, mappingFileName);
+      const mappingFilePath = path.join(outputDir, mappingFileName);
       const mapping = new DeduplicationCollector(this.logger).generateMapping(dedupedEntries);
 
       const generator = new MappingFileGenerator(this.logger);

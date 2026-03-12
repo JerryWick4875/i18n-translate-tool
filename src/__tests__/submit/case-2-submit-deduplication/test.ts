@@ -46,12 +46,11 @@ export async function run() {
     const actualBasePath = path.join(
       tempDir,
       'i18n-translate-submission',
-      'zh-CN',
-      'app/shop/locales/en-US/entries/translations.yml'
+      'app/shop/locales/zh-CN/entries/translations.yml'
     );
     const expectedBasePath = path.join(
       expectedDir,
-      'zh-CN/app/shop/locales/en-US/entries/translations.yml'
+      'app/shop/locales/zh-CN/entries/translations.yml'
     );
 
     const actualBaseContent = await fs.readFile(actualBasePath, 'utf-8');
@@ -70,12 +69,11 @@ export async function run() {
     const actualTargetPath = path.join(
       tempDir,
       'i18n-translate-submission',
-      'en-US',
       'app/shop/locales/en-US/entries/translations.yml'
     );
     const expectedTargetPath = path.join(
       expectedDir,
-      'en-US/app/shop/locales/en-US/entries/translations.yml'
+      'app/shop/locales/en-US/entries/translations.yml'
     );
 
     const actualTargetContent = await fs.readFile(actualTargetPath, 'utf-8');
@@ -94,7 +92,6 @@ export async function run() {
     const mappingPath = path.join(
       tempDir,
       'i18n-translate-submission',
-      'zh-CN',
       '_translation-mapping.yml'
     );
 
