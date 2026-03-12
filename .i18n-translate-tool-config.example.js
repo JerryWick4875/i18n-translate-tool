@@ -46,4 +46,25 @@ module.exports = {
       '待翻译'
     ],
   },
+
+  // ==================== 提交功能配置（可选）====================
+  // submission: {
+  //   // 提取文件输出目录（相对于项目根目录）
+  //   outputDir: 'i18n-translate-submission',
+  //
+  //   // 去重功能配置
+  //   deduplication: {
+  //     enabled: false,                    // 是否启用去重
+  //     mappingFileName: '_translation-mapping.yml', // 映射文件名
+  //   },
+  //
+  //   // GitLab 配置（用于 --apply 提交到 GitLab）
+  //   gitlab: {
+  //     url: 'https://gitlab.example.com', // GitLab 地址
+  //     project: 'group/project',          // 项目路径（如: mygroup/myproject）
+  //     token: process.env.GITLAB_TOKEN || '', // 访问令牌
+  //     basePath: '',                      // 文件在仓库中的基础路径（可选）
+  //     baseBranch: 'main',                // 创建分支的基线分支（可选，默认 main）
+  //   },
+  // },
 };

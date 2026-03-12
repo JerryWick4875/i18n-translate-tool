@@ -153,7 +153,9 @@ export const command = new Command('submit')
 
       // 创建分支
       logger.section('\n🌿 创建分支...');
-      await gitlabClient.createBranch(branchName, 'main');
+      const baseBranch = gitlabConfig.baseBranch || 'main';
+      logger.info(`基线分支: ${baseBranch}`);
+      await gitlabClient.createBranch(branchName, baseBranch);
 
       // 准备文件
       logger.section('\n📁 准备文件...');

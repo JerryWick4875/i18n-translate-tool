@@ -219,6 +219,7 @@ export interface GitLabConfig {
   project: string;
   token: string;
   basePath?: string;
+  baseBranch?: string; // 创建分支的基线分支，默认为 'main'
 }
 
 /**
