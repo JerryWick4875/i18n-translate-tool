@@ -4,6 +4,7 @@ import { Logger } from '../utils/logger';
 import { GitLabFetcher } from '../core/gitlab-fetcher';
 import { TranslationValidator } from '../core/translation-validator';
 import { TranslationMerger } from '../core/translation-merger';
+import { loadConfig } from '../config/config-loader';
 import { PullOptions, PullResult, I18nConfig } from '../types';
 
 export const command = new Command('pull')
@@ -14,7 +15,7 @@ export const command = new Command('pull')
   .option('--dry-run', '预览模式，不实际修改文件')
   .option('--force', '强制覆盖已有的翻译值')
   .option('--mapping-file <path>', '映射文件路径')
-  .option('--config <path>', '配置文件路径', '.i18ntoolrc.js')
+  .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出')
   .action(async (options) => {
       const logger = new Logger(options.verbose);
@@ -25,7 +26,7 @@ export const command = new Command('pull')
 
         const configPath = path.resolve(options.config);
         const configDir = path.dirname(configPath);
-        const config = await loadConfigFromPath(configPath) as I18nConfig;
+        const config = await loadConfig(configDir, configPath);
 
         // 验证 GitLab 配置
         if (!config.submission?.gitlab) {
@@ -185,19 +186,3 @@ export const command = new Command('pull')
       }
     });
 
-/**
- * 从指定路径加载配置
- */
-async function loadConfigFromPath(configPath: string): Promise<any> {
-  try {
-    // 清除 require 缓存以允许重新加载
-    delete require.cache[require.resolve(configPath)];
-    const module = await import(configPath);
-    return module.default || module;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to load config from ${configPath}: ${error.message}`);
-    }
-    throw error;
-  }
-}

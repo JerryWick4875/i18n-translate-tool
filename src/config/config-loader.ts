@@ -12,16 +12,21 @@ const CONFIG_FILE_NAME = '.i18n-translate-tool-config.js';
 /**
  * 从项目目录加载配置
  * 在指定目录或父目录中搜索配置文件
+ * @param cwd - 起始目录
+ * @param configPath - 可选的配置文件路径，如果提供则直接使用
  */
-export async function loadConfig(cwd: string): Promise<I18nConfig> {
-  const configPath = await findConfigFile(cwd);
+export async function loadConfig(cwd: string, configPath?: string): Promise<I18nConfig> {
+  const finalConfigPath = configPath ? path.resolve(cwd, configPath) : await findConfigFile(cwd);
 
-  if (!configPath) {
+  if (!finalConfigPath) {
     return DEFAULT_CONFIG;
   }
 
+  // 使用最终的配置路径
+  const configDir = path.dirname(finalConfigPath);
+
   try {
-    const userConfig = await importUserConfig(configPath);
+    const userConfig = await importUserConfig(finalConfigPath);
     const merged = mergeConfig(DEFAULT_CONFIG, userConfig);
     validateConfig(merged);
     return merged;
@@ -29,6 +34,35 @@ export async function loadConfig(cwd: string): Promise<I18nConfig> {
     if (error instanceof Error) {
       // Check if it's a ZodError
       if ('issues' in error && Array.isArray(error.issues)) {
+        const zodError = error as { issues: Array<{ path: string[]; message: string }> };
+        const errorMessages = zodError.issues.map(
+          issue => `${issue.path.join('.')}: ${issue.message}`
+        ).join('\n');
+        throw new Error(`Config validation failed:\n${errorMessages}`);
+      }
+      throw new Error(`Failed to load config from ${finalConfigPath}: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+/**
+ * 从指定路径加载配置（旧版本兼容）
+ * @deprecated 使用 loadConfig(cwd, configPath) 替代
+ */
+export async function loadConfigFromPath(configPath: string): Promise<I18nConfig> {
+  try {
+    // 清除 require 缓存以允许重新加载
+    delete require.cache[require.resolve(configPath)];
+    const mod = await import(configPath);
+    const userConfig = mod.default || mod;
+    const merged = mergeConfig(DEFAULT_CONFIG, userConfig);
+    validateConfig(merged);
+    return merged;
+  } catch (error) {
+    if (error instanceof Error) {
+      // Check if it's a ZodError
+      if ('issues' in error && Array.isArray((error as { issues?: unknown }).issues)) {
         const zodError = error as { issues: Array<{ path: string[]; message: string }> };
         const errorMessages = zodError.issues.map(
           issue => `${issue.path.join('.')}: ${issue.message}`

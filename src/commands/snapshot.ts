@@ -11,7 +11,7 @@ export const command = new Command('snapshot')
   .description('创建基础语言的快照用于目标语言')
   .option('--target <language>', '目标语言代码 (例如: en-US)', 'en-US')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
-  .option('--config <path>', '配置文件路径', '.i18ntoolrc.js')
+  .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
   .option('--dry-run', '显示更改但不写入文件', false)
   .action(async (options) => {
@@ -19,7 +19,7 @@ export const command = new Command('snapshot')
       const logger = new Logger(options.verbose, false);
       const cwd = process.cwd();
 
-      const config = await loadConfig(cwd);
+      const config = await loadConfig(cwd, options.config);
       const basePath = cwd;
 
       const scanner = new LocaleScanner(basePath);

@@ -5,6 +5,7 @@ const TEST_GROUPS = {
   config: [
     'case-1-config-loading',
     'case-2-invalid-config',
+    'case-3-custom-config-path',
   ],
   snapshot: [
     'case-1-snapshot-basic',

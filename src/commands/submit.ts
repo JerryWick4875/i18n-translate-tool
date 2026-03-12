@@ -2,9 +2,9 @@ import { Command } from 'commander';
 import { SubmissionExtractor } from '../core/submission-extractor';
 import { GitLabClient } from '../core/gitlab-client';
 import { loadConfig } from '../config/config-loader';
+import * as path from 'path';
 import { Logger } from '../utils/logger';
 import { fileExists } from '../utils/file-utils';
-import * as path from 'path';
 import * as fs from 'fs/promises';
 
 export const command = new Command('submit')
@@ -15,7 +15,7 @@ export const command = new Command('submit')
   .option('--apply', '提取后提交到 GitLab')
   .option('--dedup', '启用去重功能（相同文案只提交一次）')
   .option('--no-dedup', '禁用去重功能')
-  .option('--config <path>', '配置文件路径', '.i18ntoolrc.js')
+  .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
   .action(async (options) => {
     try {
@@ -28,7 +28,7 @@ export const command = new Command('submit')
       logger.section('\n🚀 i18n-tool submit');
 
       // 加载配置
-      const config = await loadConfigFromPath(configPath);
+      const config = await loadConfig(configDir, configPath);
       const basePath = configDir;
 
       // 获取输出目录
@@ -190,20 +190,3 @@ export const command = new Command('submit')
       process.exit(1);
     }
   });
-
-/**
- * 从指定路径加载配置
- */
-async function loadConfigFromPath(configPath: string): Promise<any> {
-  try {
-    // 清除 require 缓存以允许重新加载
-    delete require.cache[require.resolve(configPath)];
-    const module = await import(configPath);
-    return module.default || module;
-  } catch (error) {
-    if (error instanceof Error) {
-      throw new Error(`Failed to load config from ${configPath}: ${error.message}`);
-    }
-    throw error;
-  }
-}

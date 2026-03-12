@@ -13,7 +13,7 @@ export const command = new Command('reuse-translations')
   .option('--force', '强制覆盖已存在的建议文件')
 
   .option('--apply', '应用模式：应用建议文件中的翻译', false)
-  .option('--config <path>', '配置文件路径', '.i18ntoolrc.js')
+  .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
   .option('--dry-run', '显示更改但不写入文件', false)
   .action(async (options) => {
@@ -21,7 +21,7 @@ export const command = new Command('reuse-translations')
       const logger = new Logger(options.verbose, false);
       const cwd = process.cwd();
 
-      const config = await loadConfig(cwd);
+      const config = await loadConfig(cwd, options.config);
       const basePath = cwd;
 
       // 确定输出/输入文件路径
