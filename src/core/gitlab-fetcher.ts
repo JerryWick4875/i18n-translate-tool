@@ -135,16 +135,9 @@ export class GitLabFetcher {
       // 提取文件路径
       for (const item of repositoryTree) {
         if (item.type === 'blob') {
-          // 如果有 basePath，需要将其从路径中移除
-          let filePath = item.path;
-          if (basePath && filePath.startsWith(basePath)) {
-            filePath = filePath.substring(basePath.length);
-            // 移除开头的斜杠
-            if (filePath.startsWith('/')) {
-              filePath = filePath.substring(1);
-            }
-          }
-          files.push(filePath);
+          // 保留完整路径，不移除 basePath
+          // 这样 readFile 可以直接使用，无需再次拼接 basePath
+          files.push(item.path);
         }
       }
     } catch (error) {
@@ -162,15 +155,10 @@ export class GitLabFetcher {
    */
   private async readFile(branch: string, filePath: string): Promise<Record<string, string>> {
     try {
-      // 构建完整路径
-      const fullPath = this.config.basePath
-        ? `${this.config.basePath}/${filePath}`
-        : filePath;
-
-      // 使用 GitLab API 读取文件
+      // listFiles 返回的是完整路径（包含 basePath），直接使用
       const file = await this.gitlab.RepositoryFiles.show(
         this.config.project,
-        fullPath,
+        filePath,
         branch
       );
 
