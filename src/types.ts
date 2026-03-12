@@ -30,13 +30,7 @@ export interface I18nConfig {
       enabled?: boolean;
       mappingFileName?: string;
     };
-    gitlab?: {
-      url: string;
-      project: string;
-      token: string;
-      basePath?: string;
-      baseBranch?: string;
-    };
+    gitlab?: GitLabConfig;
   };
 }
 
@@ -221,6 +215,7 @@ export interface GitLabConfig {
   token: string;
   basePath?: string;
   baseBranch?: string; // 创建分支的基线分支，默认为 'main'
+  legacyUrlFormat?: boolean; // 是否使用老版本 GitLab URL 格式（无 '-' 分隔符）
 }
 
 /**

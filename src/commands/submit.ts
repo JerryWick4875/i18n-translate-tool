@@ -183,8 +183,8 @@ export const command = new Command('submit')
       logger.section('\n✅ 提交完成');
       logger.info(`分支: ${branchName}`);
       logger.info(`提交文件: ${commitCount}`);
-      logger.info(`\n🔗 在 GitLab 上查看并合并分支:`);
-      logger.info(`${gitlabConfig.url}/${gitlabConfig.project}/-/merge_requests?state=opened`);
+      logger.info(`\n🔗 在 GitLab 上查看分支:`);
+      logger.info(gitlabClient.getBranchUrl(branchName));
     } catch (error) {
       if (error instanceof Error) {
         console.error(`\n❌ Error: ${error.message}`);

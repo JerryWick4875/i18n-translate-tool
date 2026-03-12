@@ -38,6 +38,7 @@ export const DEFAULT_CONFIG: I18nConfig = {
       project: 'group/i18n-translations',
       token: process.env.GITLAB_TOKEN || '',
       basePath: '',
+      legacyUrlFormat: false, // 默认使用新版 GitLab URL 格式
     },
   },
 };

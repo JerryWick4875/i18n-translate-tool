@@ -30,6 +30,7 @@ const TEST_GROUPS = {
   submit: [
     'case-2-submit-deduplication',
     'case-3-submit-no-deduplication',
+    'case-4-gitlab-legacy-url',
   ],
   pull: [
     'case-1-pull-basic',

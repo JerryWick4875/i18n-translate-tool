@@ -69,7 +69,7 @@ export class GitLabClient {
   }
 
   /**
-   * 提交多个文件到仓库
+   * 提交多个文件到仓库（单个 commit）
    */
   async commitFiles(
     files: FileCommit[],
@@ -78,29 +78,30 @@ export class GitLabClient {
   ): Promise<number> {
     this.logger.section(`\n📤 提交 ${files.length} 个文件到 GitLab...`);
 
-    let successCount = 0;
-    let failCount = 0;
+    try {
+      // 构建 actions 数组，用于批量提交
+      const actions = files.map((file) => ({
+        action: 'create' as const,
+        filePath: file.path,
+        content: file.content,
+      }));
 
-    // 串行提交文件，避免并发冲突
-    for (const file of files) {
-      try {
-        await this.commitFile(file.path, file.content, branchName, commitMessage);
-        successCount++;
-      } catch (error) {
-        if (error instanceof Error) {
-          this.logger.error(`  ✗ ${file.path}: ${error.message}`);
-        }
-        failCount++;
+      // 使用单个 commit 提交所有文件
+      await this.gitlab.Commits.create(
+        this.config.project,
+        branchName,
+        commitMessage,
+        actions
+      );
+
+      this.logger.success(`\n✅ 成功提交 ${files.length} 个文件（单个 commit）`);
+      return files.length;
+    } catch (error) {
+      if (error instanceof Error) {
+        this.logger.error(`\n✗ 提交失败: ${error.message}`);
       }
+      throw error;
     }
-
-    if (failCount > 0) {
-      this.logger.warn(`\n⚠️  提交完成: ${successCount} 成功, ${failCount} 失败`);
-    } else {
-      this.logger.success(`\n✅ 成功提交 ${successCount} 个文件`);
-    }
-
-    return successCount;
   }
 
   /**
@@ -113,6 +114,14 @@ export class GitLabClient {
     } catch {
       return false;
     }
+  }
+
+  /**
+   * 生成查看分支的 URL
+   */
+  getBranchUrl(branchName: string): string {
+    const separator = this.config.legacyUrlFormat ? '' : '/-';
+    return `${this.config.url}/${this.config.project}${separator}/tree/${branchName}`;
   }
 
   /**
