@@ -35,6 +35,7 @@ export interface I18nConfig {
       project: string;
       token: string;
       basePath?: string;
+      baseBranch?: string;
     };
   };
 }

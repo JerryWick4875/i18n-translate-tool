@@ -44,6 +44,7 @@ const SubmissionConfigSchema = z.object({
     project: z.string().min(1),
     token: z.string(),
     basePath: z.string().optional(),
+    baseBranch: z.string().optional(),
   }).optional(),
 }).strict();
 

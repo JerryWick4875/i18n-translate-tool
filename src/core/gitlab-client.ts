@@ -175,10 +175,16 @@ export class GitLabClient {
         continue;
       }
 
-      // 去掉第一层的语言目录（zh-CN 或 en-US）
+      // 去掉第一层的语言目录（如 zh-CN, en-US, zh, en 等）
       const pathParts = relativePath.split('/');
       if (pathParts.length > 0) {
-        relativePath = pathParts.slice(1).join('/');
+        const firstPart = pathParts[0];
+        // 语言代码格式：2个字母，可选后跟 - 和更多字母/数字
+        // 如: zh, en, zh-CN, en-US, zh-Hans, pt-BR
+        const langCodePattern = /^[a-zA-Z]{2}(-[a-zA-Z0-9-]+)?$/;
+        if (langCodePattern.test(firstPart)) {
+          relativePath = pathParts.slice(1).join('/');
+        }
       }
 
       // 如果指定了 basePath，将其添加到文件路径
