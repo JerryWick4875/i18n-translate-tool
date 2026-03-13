@@ -155,6 +155,7 @@ function mergeConfig(
     submission: {
       outputDir: userConfig.submission?.outputDir || defaults.submission?.outputDir,
       gitlab: userConfig.submission?.gitlab || defaults.submission?.gitlab,
+      deduplication: userConfig.submission?.deduplication || defaults.submission?.deduplication,
     },
   };
 }
