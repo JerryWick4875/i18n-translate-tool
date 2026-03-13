@@ -70,15 +70,41 @@ export const command = new Command('submit')
           return;
         }
       } else {
-        // 输出目录存在
-        if (!options.apply && !options.force) {
-          throw new Error(
-            `输出目录已存在: ${outputDir}\n` +
-            `使用 --force 强制覆盖并重新提取，或使用 --apply 直接提交`
-          );
-        }
+        // 输出目录存在，检查是否有文件
+        const entries = await fs.readdir(outputDir, { withFileTypes: true });
+        const hasFiles = entries.some(entry => entry.isFile());
 
-        if (options.force) {
+        if (!hasFiles) {
+          // 目录为空（没有文件），直接删除并重新生成
+          logger.info(`输出目录为空，删除并重新生成: ${outputDir}`);
+          await fs.rm(outputDir, { recursive: true, force: true });
+
+          // 创建提取器
+          const extractor = new SubmissionExtractor(
+            {
+              target: options.target,
+              basePath,
+              filter: options.filter,
+              verbose: options.verbose,
+              deduplication: options.dedup ?? config.submission?.deduplication?.enabled ?? false,
+            },
+            config,
+            logger
+          );
+
+          // 执行提取
+          const result = await extractor.extract(
+            config.scanPatterns,
+            config.baseLanguage,
+            options.target,
+            outputDir
+          );
+
+          if (result.fileCount === 0) {
+            logger.warn('没有找到待翻译的词条，退出');
+            return;
+          }
+        } else if (options.force) {
           logger.info(`清空输出目录: ${outputDir}`);
           await SubmissionExtractor.clearOutputDir(outputDir);
 
@@ -107,6 +133,12 @@ export const command = new Command('submit')
             logger.warn('没有找到待翻译的词条，退出');
             return;
           }
+        } else if (!options.apply) {
+          // 目录有文件，且没有 --force 或 --apply
+          throw new Error(
+            `输出目录已存在: ${outputDir}\n` +
+            `使用 --force 强制覆盖并重新提取，或使用 --apply 直接提交`
+          );
         } else {
           logger.info(`使用现有输出目录: ${outputDir}`);
         }
