@@ -47,17 +47,6 @@ export class MappingFileGenerator {
     this.logger.section('\n📋 映射文件摘要:');
     this.logger.info(`  版本: ${mapping.version}`);
     this.logger.info(`  生成时间: ${mapping.generatedAt}`);
-    this.logger.info(`  映射条目: ${mapping.mappings.length}`);
-
-    let withOtherKeys = 0;
-    for (const entry of mapping.mappings) {
-      if (entry.otherKeys.length > 0) {
-        withOtherKeys++;
-      }
-    }
-
-    if (withOtherKeys > 0) {
-      this.logger.info(`  其中包含其他键的条目: ${withOtherKeys}`);
-    }
+    this.logger.info(`  重复文案映射条目: ${mapping.mappings.length}`);
   }
 }

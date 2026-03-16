@@ -71,17 +71,23 @@ export class DeduplicationCollector {
 
   /**
    * 生成映射文件结构
+   * 只包含有重复（otherKeys 不为空）的条目
    */
   generateMapping(dedupedEntries: DedupedEntry[]): TranslationMapping {
-    return {
-      version: '1.0.0',
-      generatedAt: new Date().toISOString(),
-      mappings: dedupedEntries.map(entry => ({
+    // 过滤掉没有重复的条目（otherKeys 为空）
+    const mappings = dedupedEntries
+      .filter(entry => entry.otherKeys.length > 0)
+      .map(entry => ({
         uniqueId: entry.uniqueId,
         baseValue: entry.baseValue,
         primaryKey: entry.primaryKey,
         otherKeys: entry.otherKeys,
-      })),
+      }));
+
+    return {
+      version: '1.0.0',
+      generatedAt: new Date().toISOString(),
+      mappings,
     };
   }
 
