@@ -8,7 +8,7 @@ module.exports = {
     dir: 'custom-snapshot-dir',
     pathPattern: '{module}/{locale}.yml',
   },
-  reuseTranslations: {
+  reuse: {
     outputFile: '.custom-reuse.yml',
     ignoreValues: ['CUSTOM_IGNORE'],
   },

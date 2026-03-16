@@ -199,33 +199,35 @@ export class ReuseEngine {
         baseFiles
       );
 
-      const suggestion: ReuseSuggestion = {
-        file: emptyKey.file.relativePath,
-        key: emptyKey.key,
-        baseValue: emptyKey.baseValue,
-      };
-
       if (matches.length === 1) {
-        suggestion.value = matches[0].value;
+        suggestions.push({
+          file: emptyKey.file.relativePath,
+          key: emptyKey.key,
+          baseValue: emptyKey.baseValue,
+          value: matches[0].value,
+        });
         uniqueMatches++;
       } else if (matches.length > 1) {
-        suggestion.suggestions = matches.map(m => ({
-          value: m.value,
-          source: m.source,
-          sourceKey: m.sourceKey,
-        }));
+        suggestions.push({
+          file: emptyKey.file.relativePath,
+          key: emptyKey.key,
+          baseValue: emptyKey.baseValue,
+          suggestions: matches.map(m => ({
+            value: m.value,
+            source: m.source,
+            sourceKey: m.sourceKey,
+          })),
+        });
         multipleMatches++;
       } else {
         noMatches++;
       }
-
-      suggestions.push(suggestion);
     }
 
     this.logger.info(`Found ${emptyKeys.length} empty translations:`);
     this.logger.info(`  - ${uniqueMatches} with unique matches (auto-fill)`);
     this.logger.info(`  - ${multipleMatches} with multiple matches (user selection needed)`);
-    this.logger.info(`  - ${noMatches} with no matches`);
+    this.logger.info(`  - ${noMatches} with no matches (skipped)`);
 
     // 构建建议数据
     const data: ReuseSuggestionsData = {

@@ -146,9 +146,9 @@ function mergeConfig(
     },
 
     // 翻译复用配置
-    reuseTranslations: {
-      outputFile: userConfig.reuseTranslations?.outputFile || defaults.reuseTranslations?.outputFile,
-      ignoreValues: userConfig.reuseTranslations?.ignoreValues ?? defaults.reuseTranslations?.ignoreValues,
+    reuse: {
+      outputFile: userConfig.reuse?.outputFile || defaults.reuse?.outputFile,
+      ignoreValues: userConfig.reuse?.ignoreValues ?? defaults.reuse?.ignoreValues,
     },
 
     // 提交配置

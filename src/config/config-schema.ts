@@ -20,7 +20,7 @@ const SnapshotConfigSchema = z.object({
 /**
  * 翻译复用配置 Schema
  */
-const ReuseTranslationsConfigSchema = z.object({
+const ReuseConfigSchema = z.object({
   outputFile: z.string().optional(),
   ignoreValues: z.array(z.string()).optional(),
 }).strict();
@@ -61,7 +61,7 @@ export const I18nConfigSchema = z.object({
   // 功能配置
   outputFormat: OutputFormatConfigSchema.optional(),
   snapshot: SnapshotConfigSchema.optional(),
-  reuseTranslations: ReuseTranslationsConfigSchema.optional(),
+  reuse: ReuseConfigSchema.optional(),
   submission: SubmissionConfigSchema.optional(),
 }).strict();
 

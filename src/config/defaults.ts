@@ -25,7 +25,7 @@ export const DEFAULT_CONFIG: I18nConfig = {
   },
 
   // 翻译复用配置
-  reuseTranslations: {
+  reuse: {
     outputFile: '.i18n-translate-tool-reuse.yml',
     ignoreValues: ['(i18n-no-translate)', '-', 'TODO'],
   },

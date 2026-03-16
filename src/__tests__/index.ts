@@ -19,7 +19,7 @@ const TEST_GROUPS = {
     'case-6-product-structure',
     'case-7-filter-directory',
   ],
-  'reuse-translations': [
+  reuse: [
     'case-1-unique-match',
     'case-2-multiple-matches',
     'case-3-apply-translations',

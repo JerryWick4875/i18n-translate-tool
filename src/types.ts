@@ -18,7 +18,7 @@ export interface I18nConfig {
   };
 
   // 翻译复用功能配置
-  reuseTranslations?: {
+  reuse?: {
     outputFile?: string;
     ignoreValues?: string[];
   };

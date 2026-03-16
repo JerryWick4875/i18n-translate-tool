@@ -33,7 +33,7 @@ module.exports = {
   },
 
   // ==================== 翻译复用功能配置 ====================
-  reuseTranslations: {
+  reuse: {
     // 翻译复用建议文件输出路径（相对于项目根目录）
     outputFile: '.i18n-translate-tool-reuse.yml',
 

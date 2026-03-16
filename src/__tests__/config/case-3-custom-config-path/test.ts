@@ -19,8 +19,8 @@ export async function run() {
     { name: 'scanPatterns[0]', expected: 'custom/(* as module)/locales/(* as locale)/*.yml', actual: result.scanPatterns?.[0] },
     { name: 'snapshot.dir', expected: 'custom-snapshot-dir', actual: result.snapshot?.dir },
     { name: 'snapshot.pathPattern', expected: '{module}/{locale}.yml', actual: result.snapshot?.pathPattern },
-    { name: 'reuseTranslations.outputFile', expected: '.custom-reuse.yml', actual: result.reuseTranslations?.outputFile },
-    { name: 'reuseTranslations.ignoreValues[0]', expected: 'CUSTOM_IGNORE', actual: result.reuseTranslations?.ignoreValues?.[0] },
+    { name: 'reuse.outputFile', expected: '.custom-reuse.yml', actual: result.reuse?.outputFile },
+    { name: 'reuse.ignoreValues[0]', expected: 'CUSTOM_IGNORE', actual: result.reuse?.ignoreValues?.[0] },
   ];
 
   let allPassed = true;

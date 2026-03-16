@@ -75,10 +75,10 @@ i18n-translate-tool sync --target=en-US
 
 ```bash
 # 生成翻译复用建议
-i18n-translate-tool reuse-translations --target=en-US
+i18n-translate-tool reuse --target=en-US
 
 # 一键应用唯一匹配的翻译
-i18n-translate-tool reuse-translations --apply --target=en-US
+i18n-translate-tool reuse --apply --target=en-US
 ```
 
 ## 配置说明
@@ -102,7 +102,7 @@ module.exports = {
   },
 
   // 翻译复用功能配置
-  reuseTranslations: {
+  reuse: {
     outputFile: '.i18n-translate-tool-reuse.yml',
     ignoreValues: ['(i18n-no-translate)', '-', 'TODO'],
   },
@@ -141,7 +141,7 @@ Scan pattern must include "(* as locale)" to specify language code.
 - `dir` - 快照文件存储目录（默认: `i18n-translate-snapshot`）
 - `pathPattern` - 快照文件路径模式，支持变量替换
 
-### reuseTranslations 配置
+### reuse 配置
 
 - `outputFile` - 翻译复用建议文件路径（默认: `.i18n-translate-tool-reuse.yml`）
 - `ignoreValues` - 被视为"空值"的字符串列表
@@ -204,12 +204,12 @@ i18n-translate-tool sync --target=en-US --filter=app/shop
 i18n-translate-tool sync --target=en-US --dry-run
 ```
 
-### reuse-translations - 复用翻译
+### reuse - 复用翻译
 
 自动查找并复用相同中文内容的现有翻译。
 
 ```bash
-i18n-translate-tool reuse-translations [选项]
+i18n-translate-tool reuse [选项]
 ```
 
 **选项：**
@@ -225,17 +225,17 @@ i18n-translate-tool reuse-translations [选项]
 
 1. **生成模式** - 创建建议文件
 ```bash
-i18n-translate-tool reuse-translations --target=en-US
+i18n-translate-tool reuse --target=en-US
 ```
 
 2. **应用模式** - 从建议文件应用翻译
 ```bash
-i18n-translate-tool reuse-translations --apply
+i18n-translate-tool reuse --apply
 ```
 
 3. **一键模式** - 生成并立即应用唯一匹配
 ```bash
-i18n-translate-tool reuse-translations --apply --target=en-US
+i18n-translate-tool reuse --apply --target=en-US
 ```
 
 ## 工作流程
@@ -257,7 +257,7 @@ i18n-translate-tool reuse-translations --apply --target=en-US
 4. **复用翻译**（可选）：
    ```bash
    # 自动填充相同中文内容的现有翻译
-   i18n-translate-tool reuse-translations --apply --target=en-US
+   i18n-translate-tool reuse --apply --target=en-US
    ```
 
 5. **翻译**：翻译人员填充剩余的空字符串

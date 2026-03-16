@@ -4,7 +4,7 @@ import { loadConfig } from '../config/config-loader';
 import { Logger } from '../utils/logger';
 import * as path from 'path';
 
-export const command = new Command('reuse-translations')
+export const command = new Command('reuse')
   .description('复用现有翻译填充空翻译')
   .option('--target <language>', '目标语言代码 (例如: en-US)', 'en-US')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
@@ -25,8 +25,8 @@ export const command = new Command('reuse-translations')
       const basePath = cwd;
 
       // 确定输出/输入文件路径
-      const outputPath = options.output || config.reuseTranslations?.outputFile || '.i18ntool-reuse.yml';
-      const inputPath = options.input || config.reuseTranslations?.outputFile || '.i18ntool-reuse.yml';
+      const outputPath = options.output || config.reuse?.outputFile || '.i18ntool-reuse.yml';
+      const inputPath = options.input || config.reuse?.outputFile || '.i18ntool-reuse.yml';
 
       const reuseEngine = new ReuseEngine(
         {
@@ -108,7 +108,7 @@ export const command = new Command('reuse-translations')
 
         logger.info(`\n📝 Suggestions written to ${outputPath}`);
         logger.info('Edit the file to select from multiple suggestions, then run:');
-        logger.info(`  i18n-tool reuse-translations --apply --input ${outputPath}`);
+        logger.info(`  i18n-tool reuse --apply --input ${outputPath}`);
       }
 
       logger.success('\n✅ Reuse translations completed');
