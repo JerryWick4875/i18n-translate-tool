@@ -219,7 +219,7 @@ export const command = new Command('submit')
       logger.info(gitlabClient.getBranchUrl(branchName));
     } catch (error) {
       if (error instanceof Error) {
-        console.error(`\n❌ Error: ${error.message}`);
+        console.error(`\n❌ 错误: ${error.message}`);
       }
       process.exit(1);
     }

@@ -32,7 +32,7 @@ export const command = new Command('snapshot')
           return relativeDir.startsWith(normalizedFilter);
         });
         if (files.length === 0) {
-          logger.warn(`No files found matching filter: ${options.filter}`);
+          logger.warn(`未找到匹配过滤条件的文件: ${options.filter}`);
           return;
         }
       }
@@ -63,36 +63,36 @@ export const command = new Command('snapshot')
         );
 
         if (baseFiles.length === 0) {
-          logger.warn(`No ${config.baseLanguage} files found for ${group}`);
+          logger.warn(`未找到 ${group} 的 ${config.baseLanguage} 文件`);
           continue;
         }
 
         const baseData = new Map<string, Record<string, string>>();
         for (const file of baseFiles) {
           baseData.set(file.relativePath, file.content);
-          logger.verboseLog(`Found: ${file.relativePath} (${Object.keys(file.content).length} keys)`);
+          logger.verboseLog(`找到: ${file.relativePath} (${Object.keys(file.content).length} 个键)`);
         }
 
         const variables = baseFiles[0]?.variables || {};
 
         if (options.dryRun) {
           const snapshotPath = snapshotManager.getSnapshotPath(group, options.target, variables);
-          logger.dryRun(`Would create snapshot: ${snapshotPath}`);
-          logger.info(`Files: ${baseData.size}, Keys: ${Array.from(baseData.values()).reduce((sum, obj) => sum + Object.keys(obj).length, 0)}`);
+          logger.dryRun(`将创建快照: ${snapshotPath}`);
+          logger.info(`文件: ${baseData.size}, 键数: ${Array.from(baseData.values()).reduce((sum, obj) => sum + Object.keys(obj).length, 0)}`);
         } else {
           await snapshotManager.createSnapshot(group, options.target, baseData, variables);
-          logger.success(`Snapshot created: ${options.target} for ${group}`);
+          logger.success(`快照已创建: ${options.target} for ${group}`);
         }
       }
 
       if (options.dryRun) {
-        logger.section('\n✅ Dry-run completed (no files written)');
+        logger.section('\n✅ 试运行完成 (未写入文件)');
       } else {
-        logger.section('\n✅ Snapshot creation completed');
+        logger.section('\n✅ 快照创建完成');
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error(`Error: ${error.message}`);
+        console.error(`错误: ${error.message}`);
       }
       process.exit(1);
     }

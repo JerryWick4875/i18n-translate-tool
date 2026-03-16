@@ -19,7 +19,7 @@ export const command = new Command('sync')
       const config = await loadConfig(cwd, options.config);
       const basePath = cwd;
 
-      logger.section(`\n🔄 Syncing to ${options.target}...`);
+      logger.section(`\n🔄 同步到 ${options.target}...`);
 
       const syncEngine = new SyncEngine(
         {
@@ -49,10 +49,10 @@ export const command = new Command('sync')
         );
       }
 
-      logger.success('\n✅ Sync completed');
+      logger.success('\n✅ 同步完成');
     } catch (error) {
       if (error instanceof Error) {
-        console.error(`Error: ${error.message}`);
+        console.error(`错误: ${error.message}`);
       }
       process.exit(1);
     }

@@ -48,7 +48,7 @@ export const command = new Command('reuse')
       if (options.apply) {
         if (options.target !== 'en-US') {
           // 一键模式：使用 --apply 和 --target
-          logger.section(`\n🚀 One-time mode for ${options.target}...`);
+          logger.section(`\n🚀 ${options.target} 一键模式...`);
 
           const result = await reuseEngine.generateAndApply(
             config.scanPatterns,
@@ -65,15 +65,15 @@ export const command = new Command('reuse')
           }
 
           if (result.filledCount > 0) {
-            logger.success(`\n✅ Filled ${result.filledCount} translations`);
+            logger.success(`\n✅ 已填充 ${result.filledCount} 个翻译`);
           } else if (result.multipleMatchesCount > 0) {
-            logger.info(`\nℹ️  Found ${result.multipleMatchesCount} items with multiple matches (use generate mode to review)`);
+            logger.info(`\nℹ️  发现 ${result.multipleMatchesCount} 个多选匹配项 (使用生成模式查看)`);
           } else {
-            logger.info('\nℹ️  No translations to fill');
+            logger.info('\nℹ️  没有需要填充的翻译');
           }
         } else {
           // 应用模式：仅应用现有建议文件
-          logger.section(`\n📝 Applying translations from ${inputPath}...`);
+          logger.section(`\n📝 应用来自 ${inputPath} 的翻译...`);
 
           const suggestionsData = await reuseEngine.readSuggestionsFile(inputPath);
 
@@ -91,14 +91,14 @@ export const command = new Command('reuse')
           }
 
           if (result.filledCount > 0) {
-            logger.success(`\n✅ Applied ${result.filledCount} translations`);
+            logger.success(`\n✅ 已应用 ${result.filledCount} 个翻译`);
           } else {
-            logger.info('\nℹ️  No translations applied (edit the suggestions file first)');
+            logger.info('\nℹ️  未应用翻译 (请先编辑建议文件)');
           }
         }
       } else {
         // 生成模式：生成建议文件
-        logger.section(`\n🔍 Generating reuse suggestions for ${options.target}...`);
+        logger.section(`\n🔍 为 ${options.target} 生成复用建议...`);
 
         await reuseEngine.generateSuggestions(
           config.scanPatterns,
@@ -106,15 +106,15 @@ export const command = new Command('reuse')
           outputPath
         );
 
-        logger.info(`\n📝 Suggestions written to ${outputPath}`);
-        logger.info('Edit the file to select from multiple suggestions, then run:');
+        logger.info(`\n📝 建议已写入 ${outputPath}`);
+        logger.info('编辑文件以从多选中选择，然后运行:');
         logger.info(`  i18n-tool reuse --apply --input ${outputPath}`);
       }
 
-      logger.success('\n✅ Reuse translations completed');
+      logger.success('\n✅ 翻译复用完成');
     } catch (error) {
       if (error instanceof Error) {
-        console.error(`Error: ${error.message}`);
+        console.error(`错误: ${error.message}`);
       }
       process.exit(1);
     }
