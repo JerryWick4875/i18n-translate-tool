@@ -289,8 +289,8 @@ export class SubmissionExtractor {
     for (const [key, baseValue] of Object.entries(baseFile.content)) {
       const targetValue = targetFile.content[key];
 
-      // 如果目标值不存在或为空，则认为是未翻译
-      if (!targetValue || targetValue.trim() === '') {
+      // 如果目标值不存在或为空，则认为是未翻译（保持原始值，不进行 trim）
+      if (targetValue === undefined || targetValue === '') {
         untranslated.set(key, baseValue);
       }
     }
