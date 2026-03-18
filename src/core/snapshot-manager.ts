@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as yaml from 'js-yaml';
 import { SnapshotData } from '../types';
-import { ensureDir, fileExists } from '../utils/file-utils';
+import { ensureDir, fileExists, normalizePath } from '../utils/file-utils';
 
 /**
  * 快照管理器，用于创建、读取和删除快照
@@ -59,7 +59,8 @@ export class SnapshotManager {
     const snapshotData: SnapshotData = {};
 
     for (const [filePath, content] of baseLanguageData) {
-      snapshotData[filePath] = { ...content };
+      // 规范化路径为正斜杠（跨平台兼容）
+      snapshotData[normalizePath(filePath)] = { ...content };
     }
 
     const yamlContent = yaml.dump(snapshotData, {
@@ -155,7 +156,8 @@ export class SnapshotManager {
     const snapshotData: SnapshotData = {};
 
     for (const file of files) {
-      snapshotData[file.relativePath] = { ...file.content };
+      // 规范化路径为正斜杠（跨平台兼容）
+      snapshotData[normalizePath(file.relativePath)] = { ...file.content };
     }
 
     return snapshotData;

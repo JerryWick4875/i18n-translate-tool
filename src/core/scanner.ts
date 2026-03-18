@@ -110,9 +110,14 @@ export class LocaleScanner {
       const globPattern = parsed.original
         .replace(/\(\*\s+as\s+[^\/\\\s]+\)/g, '*');
 
-      const absolutePattern = path.isAbsolute(globPattern)
-        ? globPattern
-        : path.join(this.basePath, globPattern);
+      // 确保路径格式正确：glob 库在 Windows 下需要正斜杠或本地路径分隔符
+      let absolutePattern: string;
+      if (path.isAbsolute(globPattern)) {
+        absolutePattern = globPattern;
+      } else {
+        // 使用 normalizePath 确保跨平台兼容性
+        absolutePattern = normalizePath(path.join(this.basePath, globPattern));
+      }
 
       const matches = await glob(absolutePattern, {
         absolute: true,
