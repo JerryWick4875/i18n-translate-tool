@@ -28,15 +28,17 @@ export class LocaleScanner {
   /**
    * 解析模式以提取命名通配符
    * 语法: (* as name) 捕获路径段并将其赋值给变量 'name'
+   *
+   * 注意：路径在使用前会通过 normalizePath 转换为正斜杠格式，
+   * 所以正则表达式只需要匹配 / 即可
    */
   private parsePatterns(patterns: string[]): ParsedPattern[] {
     return patterns.map(pattern => {
       const variableNames: string[] = [];
 
       // 将 (* as name) 替换为正则表达式捕获组（必须在转义之前完成）
-      // 使用 [^/\\]+ 匹配路径段（同时处理 Unix / 和 Windows \
       let regexStr = pattern
-        .replace(/\(\*\s+as\s+([^\/\\\s]+)\)/g, (_, name) => {
+        .replace(/\(\*\s+as\s+([^\/\s]+)\)/g, (_, name) => {
           variableNames.push(name);
           return '###CAPTURE###';  // 临时占位符
         })
@@ -44,9 +46,9 @@ export class LocaleScanner {
         .replace(/[.+?^${}|[\]\\]/g, '\\$&')
         // 替换 ** 和 * 模式（对于 (* as name)，* 已被替换）
         .replace(/\*{2,}/g, '.*')
-        .replace(/\*/g, '[^/\\\\]*')
-        // 将占位符替换为捕获组 - 匹配任何非路径分隔符字符
-        .replace(/###CAPTURE###/g, '([^/\\\\]+)');
+        .replace(/\*/g, '[^/]*')
+        // 将占位符替换为捕获组
+        .replace(/###CAPTURE###/g, '([^/]+)');
 
       return {
         original: pattern,
@@ -86,9 +88,8 @@ export class LocaleScanner {
    * 向后兼容的默认 app 提取
    */
   private extractDefaultApp(relativePath: string): string {
-    // 规范化路径后使用正则匹配（支持 / 和 \）
-    const normalizedPath = normalizePath(relativePath);
-    const appMatch = normalizedPath.match(/[/\\]([^/\\]+)[/\\]/);
+    // 路径已通过 normalizePath 转换为正斜杠格式
+    const appMatch = relativePath.match(/\/([^/]+)\//);
     return appMatch ? appMatch[1] : 'default';
   }
 
