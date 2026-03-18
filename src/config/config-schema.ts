@@ -48,7 +48,6 @@ const XanaduPersonnelConfigSchema = z.object({
  * Xanadu 项目配置 Schema
  */
 const XanaduProjectConfigSchema = z.object({
-  productId: z.number().int().optional(),
   level: z.enum(['normal', 'high', 'low']).optional(),
   versionType: z.enum(['oversea', 'domestic']).optional(),
 }).strict();

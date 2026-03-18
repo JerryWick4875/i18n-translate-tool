@@ -53,7 +53,6 @@ export const DEFAULT_CONFIG: I18nConfig = {
         feDockerId: 0,
       },
       project: {
-        productId: 0,
         level: 'normal',
         versionType: 'oversea',
       },

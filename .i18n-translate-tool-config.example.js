@@ -61,10 +61,27 @@ module.exports = {
   //   // GitLab 配置（用于 --apply 提交到 GitLab）
   //   gitlab: {
   //     url: 'https://gitlab.example.com', // GitLab 地址
-  //     project: 'group/project',          // 项目路径（如: mygroup/myproject）
+  //     projectId: 123,                    // 项目 ID
   //     token: process.env.GITLAB_TOKEN || '', // 访问令牌
   //     basePath: '',                      // 文件在仓库中的基础路径（可选）
   //     baseBranch: 'main',                // 创建分支的基线分支（可选，默认 main）
+  //   },
+  //
+  //   // Xanadu 配置（用于提交到翻译平台）
+  //   xanadu: {
+  //     sourceLang: 'zh',                  // 源语言代码
+  //     targetLang: 'en',                  // 目标语言代码
+  //     personnel: {                       // 人员配置（Docker ID）
+  //       prDockerId: 123,                 // PR 人员 ID
+  //       translationDockerId: 456,        // 翻译人员 ID
+  //       commitDockerId: 789,             // 提交人员 ID
+  //       managerId: 101,                  // 管理员 ID
+  //       feDockerId: 102,                 // 前端人员 ID
+  //     },
+  //     project: {                         // 项目配置
+  //       level: 'normal',                 // 优先级: normal | high | low
+  //       versionType: 'oversea',          // 版本类型: oversea | domestic
+  //     },
   //   },
   // },
 };

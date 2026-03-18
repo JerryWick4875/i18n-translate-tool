@@ -111,9 +111,7 @@ export const command = new Command('submit-xanadu')
         // 场景 B: 创建新项目
         logger.info('创建新项目模式');
 
-        const productId = options.productId
-          ? parseInt(options.productId, 10)
-          : xanaduConfig.project?.productId;
+        const productId = options.productId ? parseInt(options.productId, 10) : 0;
         const projectName = options.projectName;
 
         // 创建项目时必须有项目名称

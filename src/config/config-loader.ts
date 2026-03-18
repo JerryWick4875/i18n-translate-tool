@@ -186,7 +186,6 @@ function mergeXanaduConfig(
       feDockerId: userConfig.personnel?.feDockerId ?? defaults?.personnel?.feDockerId ?? 0,
     },
     project: {
-      productId: userConfig.project?.productId ?? defaults?.project?.productId ?? 0,
       level: userConfig.project?.level || defaults?.project?.level || 'normal',
       versionType: userConfig.project?.versionType || defaults?.project?.versionType || 'oversea',
     },

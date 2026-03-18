@@ -161,7 +161,7 @@ export class XanaduClient {
     const requestBody = {
       id: 0,
       gitlab_domain: options.gitlabDomain,
-      product_id: options.productId || this.config.project?.productId || 0,
+      product_id: options.productId || 0,
       product_version: options.projectName,
       gitlab_project_id: String(options.gitlabProjectId),
       remark_info: '',

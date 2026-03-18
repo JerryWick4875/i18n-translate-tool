@@ -188,7 +188,6 @@ module.exports = {
         feDockerId: 0,      // 创建项目时使用
       },
       project: {
-        productId: 0,           // 产品 ID（创建项目时使用）
         level: 'normal',        // normal | high | low
         versionType: 'oversea', // oversea | domestic
       },
@@ -211,7 +210,7 @@ module.exports = {
 - `sourceLang` - 源语言（默认: zh-CN）
 - `targetLang` - 目标语言（默认: en-US）
 - `personnel` - 人员配置（prDockerId, translationDockerId, commitDockerId, managerId, feDockerId）
-- `project` - 项目配置（productId, level, versionType）
+- `project` - 项目配置（level, versionType）
 
 ## 命令使用
 
