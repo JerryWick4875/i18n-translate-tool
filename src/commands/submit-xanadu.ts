@@ -84,8 +84,8 @@ export const command = new Command('submit-xanadu')
         );
       }
 
-      // 用换行符拼接多个路径
-      const ymlPathValue = ymlPaths.join('\n');
+      // 用英文逗号拼接多个路径
+      const ymlPathValue = ymlPaths.join(',');
       logger.info(`找到 ${ymlPaths.length} 个匹配的目录路径:`);
       for (const yp of ymlPaths) {
         logger.info(`  - ${yp}`);
