@@ -2,6 +2,7 @@ import { Gitlab } from '@gitbeaker/rest';
 import { Logger } from '../utils/logger';
 import { GitLabConfig, RemoteFile, TranslationMapping } from '../types';
 import * as yaml from 'js-yaml';
+import * as path from 'path';
 
 /**
  * GitLab 文件获取器
@@ -124,7 +125,7 @@ export class GitLabFetcher {
     try {
       // 使用 GitLab API 列出仓库树
       const repositoryTree = await this.gitlab.Repositories.allRepositoryTrees(
-        this.config.project,
+        this.config.projectId,
         {
           ref: branch,
           path: basePath || undefined,
@@ -157,7 +158,7 @@ export class GitLabFetcher {
     try {
       // listFiles 返回的是完整路径（包含 basePath），直接使用
       const file = await this.gitlab.RepositoryFiles.show(
-        this.config.project,
+        this.config.projectId,
         filePath,
         branch
       );
@@ -190,7 +191,7 @@ export class GitLabFetcher {
     try {
       // 使用 GitLab API 读取文件
       const file = await this.gitlab.RepositoryFiles.show(
-        this.config.project,
+        this.config.projectId,
         filePath,
         branch
       );
@@ -243,5 +244,118 @@ export class GitLabFetcher {
     }
 
     return null;
+  }
+
+  /**
+   * 根据 scanPatterns 从分支中提取 YML 文件目录路径
+   * @param branch - 分支名称
+   * @param scanPatterns - 扫描模式数组
+   * @returns 匹配的目录路径数组（去重，已排序）
+   */
+  async extractYmlPaths(branch: string, scanPatterns: string[]): Promise<string[]> {
+    this.logger.verboseLog(`从分支 ${branch} 提取 YML 路径...`);
+
+    // 获取分支中的所有文件
+    const allFiles = await this.listAllFiles(branch);
+    this.logger.verboseLog(`分支中共有 ${allFiles.length} 个文件`);
+
+    // 解析 scanPatterns 为正则表达式
+    const patterns = scanPatterns.map(pattern => this.patternToRegex(pattern));
+
+    // 匹配文件并提取目录路径
+    const dirPaths = new Set<string>();
+
+    for (const filePath of allFiles) {
+      // 检查文件是否匹配任何 pattern
+      for (const regex of patterns) {
+        if (regex.test(filePath)) {
+          // 提取目录路径（到文件所在目录，不含文件名）
+          const dirPath = path.dirname(filePath);
+          dirPaths.add(dirPath);
+          this.logger.verboseLog(`  匹配: ${filePath} -> ${dirPath}`);
+          break;
+        }
+      }
+    }
+
+    const result = Array.from(dirPaths).sort();
+    this.logger.verboseLog(`提取到 ${result.length} 个唯一目录路径`);
+
+    return result;
+  }
+
+  /**
+   * 列出分支上的所有文件（不受 basePath 限制）
+   * 使用 Commits.diff 获取分支最新 commit 的所有文件变更
+   */
+  private async listAllFiles(branch: string): Promise<string[]> {
+    const files: string[] = [];
+
+    try {
+      // 首先获取分支的最新 commit
+      const branchInfo = await this.gitlab.Branches.show(this.config.projectId, branch);
+      const commitId = branchInfo.commit.id;
+
+      this.logger.verboseLog(`分支 ${branch} 最新 commit: ${commitId}`);
+
+      // 获取该 commit 的所有文件 (使用 tree API 获取完整文件树)
+      // 由于 @gitbeaker/rest 的 tree API 可能有限制，我们使用原始 REST API
+      const url = `${this.config.url}/api/v4/projects/${this.config.projectId}/repository/tree`;
+      const params = new URLSearchParams({
+        ref: branch,
+        recursive: 'true',
+        per_page: '100',
+      });
+
+      const response = await fetch(`${url}?${params}`, {
+        headers: {
+          'PRIVATE-TOKEN': this.config.token,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const treeData = (await response.json()) as Array<{ type: string; path: string }>;
+
+      // 提取文件路径
+      for (const item of treeData) {
+        if (item.type === 'blob') {
+          files.push(item.path);
+        }
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(`Failed to list files: ${error.message}`);
+      }
+      throw error;
+    }
+
+    return files;
+  }
+
+  /**
+   * 将 scanPattern 转换为匹配 GitLab 文件路径的正则表达式
+   * 示例: app/(* as app)/config/locales/(* as locale)/*.yml
+   * 转换为: ^app/([^/]+)/config/locales/([^/]+)/[^/]+\.yml$
+   */
+  private patternToRegex(pattern: string): RegExp {
+    // 按正确顺序处理 pattern
+    let regexStr = pattern
+      // 1. 首先替换 (* as name) 为占位符，避免被后续处理
+      .replace(/\(\*\s+as\s+([^\/\s]+)\)/g, '###CAPTURE###')
+      // 2. 替换 ** 为多级通配符
+      .replace(/\*\*/g, '###DBLSTAR###')
+      // 3. 替换 * 为单级通配符
+      .replace(/\*/g, '###STAR###')
+      // 4. 转义特殊正则表达式字符
+      .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
+      // 5. 恢复占位符为正确的正则
+      .replace(/###CAPTURE###/g, '([^/]+)')
+      .replace(/###DBLSTAR###/g, '.*')
+      .replace(/###STAR###/g, '[^/]*');
+
+    return new RegExp('^' + regexStr + '$');
   }
 }

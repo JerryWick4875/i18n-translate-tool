@@ -34,6 +34,38 @@ const DeduplicationConfigSchema = z.object({
 }).strict();
 
 /**
+ * Xanadu 人员配置 Schema
+ */
+const XanaduPersonnelConfigSchema = z.object({
+  prDockerId: z.number().int().optional(),
+  translationDockerId: z.number().int().optional(),
+  commitDockerId: z.number().int().optional(),
+  managerId: z.number().int().optional(),
+  feDockerId: z.number().int().optional(),
+}).strict();
+
+/**
+ * Xanadu 项目配置 Schema
+ */
+const XanaduProjectConfigSchema = z.object({
+  productId: z.number().int().optional(),
+  level: z.enum(['normal', 'high', 'low']).optional(),
+  versionType: z.enum(['oversea', 'domestic']).optional(),
+}).strict();
+
+/**
+ * Xanadu 配置 Schema
+ */
+const XanaduConfigSchema = z.object({
+  url: z.string().url().optional(),
+  taskType: z.string().optional(),
+  sourceLang: z.string().optional(),
+  targetLang: z.string().optional(),
+  personnel: XanaduPersonnelConfigSchema.optional(),
+  project: XanaduProjectConfigSchema.optional(),
+}).strict();
+
+/**
  * 提交配置 Schema
  */
 const SubmissionConfigSchema = z.object({
@@ -41,12 +73,13 @@ const SubmissionConfigSchema = z.object({
   deduplication: DeduplicationConfigSchema.optional(),
   gitlab: z.object({
     url: z.string().url(),
-    project: z.string().min(1),
+    projectId: z.number().int().nonnegative(),
     token: z.string(),
     basePath: z.string().optional(),
     baseBranch: z.string().optional(),
     legacyUrlFormat: z.boolean().optional(),
   }).optional(),
+  xanadu: XanaduConfigSchema.optional(),
 }).strict();
 
 /**

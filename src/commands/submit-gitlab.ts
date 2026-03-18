@@ -7,7 +7,7 @@ import { Logger } from '../utils/logger';
 import { fileExists } from '../utils/file-utils';
 import * as fs from 'fs/promises';
 
-export const command = new Command('submit')
+export const command = new Command('submit-gitlab')
   .description('提取待翻译词条并提交到 GitLab')
   .option('--target <language>', '目标语言代码 (例如: en-US)', 'en-US')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
@@ -25,7 +25,7 @@ export const command = new Command('submit')
       const configPath = path.resolve(options.config);
       const configDir = path.dirname(configPath);
 
-      logger.section('\n🚀 i18n-tool submit');
+      logger.section('\n🚀 i18n-tool submit-gitlab');
 
       // 加载配置
       const config = await loadConfig(configDir, configPath);
@@ -173,7 +173,7 @@ export const command = new Command('submit')
       const hasAccess = await gitlabClient.checkAccess();
       if (!hasAccess) {
         throw new Error(
-          `无法访问 GitLab 项目: ${gitlabConfig.project}\n` +
+          `无法访问 GitLab 项目: ${gitlabConfig.projectId}\n` +
           `请检查 URL 和 token 是否正确`
         );
       }
@@ -216,7 +216,7 @@ export const command = new Command('submit')
       logger.info(`分支: ${branchName}`);
       logger.info(`提交文件: ${commitCount}`);
       logger.info(`\n🔗 在 GitLab 上查看分支:`);
-      logger.info(gitlabClient.getBranchUrl(branchName));
+      logger.info(await gitlabClient.getBranchUrl(branchName));
     } catch (error) {
       if (error instanceof Error) {
         console.error(`\n❌ 错误: ${error.message}`);

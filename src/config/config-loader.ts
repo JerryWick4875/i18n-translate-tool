@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { I18nConfig } from '../types';
+import { I18nConfig, XanaduConfig } from '../types';
 import { DEFAULT_CONFIG } from './defaults';
 import { I18nConfigSchema } from './config-schema';
 
@@ -156,6 +156,39 @@ function mergeConfig(
       outputDir: userConfig.submission?.outputDir || defaults.submission?.outputDir,
       gitlab: userConfig.submission?.gitlab || defaults.submission?.gitlab,
       deduplication: userConfig.submission?.deduplication || defaults.submission?.deduplication,
+      xanadu: mergeXanaduConfig(defaults.submission?.xanadu, userConfig.submission?.xanadu),
+    },
+  };
+}
+
+/**
+ * 合并 Xanadu 配置
+ */
+function mergeXanaduConfig(
+  defaults?: XanaduConfig,
+  userConfig?: Partial<XanaduConfig>
+): XanaduConfig | undefined {
+  if (!userConfig) {
+    return defaults;
+  }
+
+  return {
+    url: userConfig.url || defaults?.url || 'https://i18n.sangfor.org',
+    taskType: userConfig.taskType || defaults?.taskType || 'Front-End',
+    sourceLang: userConfig.sourceLang || defaults?.sourceLang || 'zh-CN',
+    targetLang: userConfig.targetLang || defaults?.targetLang || 'en-US',
+    personnel: {
+      prDockerId: userConfig.personnel?.prDockerId ?? defaults?.personnel?.prDockerId ?? 0,
+      translationDockerId:
+        userConfig.personnel?.translationDockerId ?? defaults?.personnel?.translationDockerId ?? 0,
+      commitDockerId: userConfig.personnel?.commitDockerId ?? defaults?.personnel?.commitDockerId ?? 0,
+      managerId: userConfig.personnel?.managerId ?? defaults?.personnel?.managerId ?? 0,
+      feDockerId: userConfig.personnel?.feDockerId ?? defaults?.personnel?.feDockerId ?? 0,
+    },
+    project: {
+      productId: userConfig.project?.productId ?? defaults?.project?.productId ?? 0,
+      level: userConfig.project?.level || defaults?.project?.level || 'normal',
+      versionType: userConfig.project?.versionType || defaults?.project?.versionType || 'oversea',
     },
   };
 }

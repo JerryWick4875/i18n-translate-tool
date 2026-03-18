@@ -4,8 +4,9 @@ import { program } from 'commander';
 import * as snapshot from './commands/snapshot';
 import * as sync from './commands/sync';
 import * as reuseTranslations from './commands/reuse-translations';
-import * as submit from './commands/submit';
+import * as submitGitlab from './commands/submit-gitlab';
 import * as pull from './commands/pull';
+import * as submitXanadu from './commands/submit-xanadu';
 
 program
   .name('i18n-translate-tool')
@@ -16,7 +17,8 @@ program
 program.addCommand(snapshot.command);
 program.addCommand(sync.command);
 program.addCommand(reuseTranslations.command);
-program.addCommand(submit.command);
+program.addCommand(submitGitlab.command);
 program.addCommand(pull.command);
+program.addCommand(submitXanadu.command);
 
 program.parse();

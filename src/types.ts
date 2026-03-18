@@ -31,6 +31,7 @@ export interface I18nConfig {
       mappingFileName?: string;
     };
     gitlab?: GitLabConfig;
+    xanadu?: XanaduConfig; // Xanadu 翻译平台配置
   };
 }
 
@@ -211,11 +212,44 @@ export interface ExtractedFile {
  */
 export interface GitLabConfig {
   url: string;
-  project: string;
+  projectId: number; // GitLab 项目 ID（数字）
   token: string;
   basePath?: string;
   baseBranch?: string; // 创建分支的基线分支，默认为 'main'
   legacyUrlFormat?: boolean; // 是否使用老版本 GitLab URL 格式（无 '-' 分隔符）
+}
+
+/**
+ * Xanadu 人员配置
+ */
+export interface XanaduPersonnelConfig {
+  prDockerId?: number; // 默认: 0
+  translationDockerId?: number; // 默认: 0
+  commitDockerId?: number; // 默认: 0
+  managerId?: number; // 默认: 0（创建项目时用）
+  feDockerId?: number; // 默认: 0（创建项目时用）
+}
+
+/**
+ * Xanadu 项目配置
+ * 注：productVersion 作为项目名称，通过 --project-name 参数传入，不在配置文件中配置
+ */
+export interface XanaduProjectConfig {
+  productId?: number; // 产品 ID（创建项目时用）
+  level?: 'normal' | 'high' | 'low'; // 优先级，默认 normal
+  versionType?: 'oversea' | 'domestic'; // 版本类型，默认 oversea
+}
+
+/**
+ * Xanadu 配置
+ */
+export interface XanaduConfig {
+  url: string; // 默认: https://i18n.sangfor.org
+  taskType?: string; // 默认: "Front-End"
+  sourceLang?: string; // 默认: "zh-CN"
+  targetLang?: string; // 默认: "en-US"
+  personnel?: XanaduPersonnelConfig;
+  project?: XanaduProjectConfig;
 }
 
 /**

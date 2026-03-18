@@ -8,6 +8,8 @@ i18n 翻译同步和快照工具，用于管理多语言 YAML 文件的同步和
 - 📸 **快照管理**：创建基础语言快照作为同步基准
 - 🔄 **变更同步**：自动检测新增、修改、删除的翻译键
 - 🔄 **翻译复用**：自动查找并复用相同中文内容的现有翻译
+- 🚀 **GitLab 集成**：提取翻译并提交到 GitLab 分支 (`submit-gitlab`)
+- 🌐 **Xanadu 集成**：将 GitLab 翻译分支同步到 Xanadu 翻译平台 (`submit-xanadu`)
 - 🎯 **灵活过滤**：支持按目录路径过滤处理范围
 - ✅ **类型安全**：使用 TypeScript + Zod 进行配置校验
 
@@ -146,6 +148,71 @@ Scan pattern must include "(* as locale)" to specify language code.
 - `outputFile` - 翻译复用建议文件路径（默认: `.i18n-translate-tool-reuse.yml`）
 - `ignoreValues` - 被视为"空值"的字符串列表
 
+### submission 配置
+
+用于 `submit-gitlab` 和 `submit-xanadu` 命令的 GitLab 和 Xanadu 集成配置。
+
+```javascript
+module.exports = {
+  submission: {
+    // 输出目录
+    outputDir: 'i18n-translate-submission',
+
+    // 去重配置（可选）
+    deduplication: {
+      enabled: true,
+      mappingFileName: 'translation-mapping.json',
+    },
+
+    // GitLab 配置
+    gitlab: {
+      url: 'https://gitlab.example.com',
+      projectId: 12345,           // GitLab 项目 ID（数字）
+      token: process.env.GITLAB_TOKEN,
+      basePath: '',               // 文件在仓库中的基础路径
+      baseBranch: 'main',         // 创建分支的基线分支
+      legacyUrlFormat: false,     // 老版本 GitLab URL 格式
+    },
+
+    // Xanadu 翻译平台配置
+    xanadu: {
+      url: 'https://i18n.sangfor.org',
+      taskType: 'Front-End',
+      sourceLang: 'zh-CN',
+      targetLang: 'en-US',
+      personnel: {
+        prDockerId: 0,
+        translationDockerId: 0,
+        commitDockerId: 0,
+        managerId: 0,       // 创建项目时使用
+        feDockerId: 0,      // 创建项目时使用
+      },
+      project: {
+        productId: 0,           // 产品 ID（创建项目时使用）
+        level: 'normal',        // normal | high | low
+        versionType: 'oversea', // oversea | domestic
+      },
+    },
+  },
+};
+```
+
+**GitLab 配置说明：**
+- `url` - GitLab 服务器地址
+- `projectId` - GitLab 项目 ID（数字类型）
+- `token` - GitLab API Token（建议通过环境变量 GITLAB_TOKEN 设置）
+- `basePath` - 可选，文件在仓库中的基础路径
+- `baseBranch` - 可选，创建分支的基线分支，默认 'main'
+- `legacyUrlFormat` - 可选，使用老版本 GitLab URL 格式
+
+**Xanadu 配置说明：**
+- `url` - Xanadu 服务器地址（默认: https://i18n.sangfor.org）
+- `taskType` - 任务类型（默认: Front-End）
+- `sourceLang` - 源语言（默认: zh-CN）
+- `targetLang` - 目标语言（默认: en-US）
+- `personnel` - 人员配置（prDockerId, translationDockerId, commitDockerId, managerId, feDockerId）
+- `project` - 项目配置（productId, level, versionType）
+
 ## 命令使用
 
 ### snapshot - 创建快照
@@ -238,6 +305,149 @@ i18n-translate-tool reuse --apply
 i18n-translate-tool reuse --apply --target=en-US
 ```
 
+### submit-gitlab - 提交到 GitLab
+
+提取待翻译词条并提交到 GitLab 仓库。
+
+```bash
+i18n-translate-tool submit-gitlab [选项]
+```
+
+**选项：**
+- `--target <language>` - 目标语言代码（默认: en-US）
+- `--output <path>` - 输出目录（默认: i18n-translate-submission）
+- `--branch <name>` - 指定分支名称（默认: translations-YYYYMMDD-HHMMSS）
+- `--base-branch <name>` - 基线分支（默认: main）
+- `--commit-msg <message>` - 提交消息
+- `--config <path>` - 配置文件路径
+- `--verbose` - 启用详细输出
+- `--dry-run` - 预览变更
+
+**配置示例：**
+```javascript
+module.exports = {
+  submission: {
+    outputDir: 'i18n-translate-submission',
+    gitlab: {
+      url: 'https://gitlab.example.com',
+      projectId: 12345,           // GitLab 项目 ID（数字）
+      token: process.env.GITLAB_TOKEN,
+      basePath: '',               // 可选：文件在仓库中的基础路径
+      baseBranch: 'main',         // 可选：创建分支的基线分支
+      legacyUrlFormat: false,     // 可选：老版本 GitLab URL 格式
+    },
+  },
+};
+```
+
+### submit-xanadu - 同步到 Xanadu 翻译平台
+
+将 `submit-gitlab` 命令生成的 GitLab 翻译分支同步到 Xanadu 翻译平台，创建翻译任务。
+
+**工作原理：**
+1. 根据本地配置文件中的 `scanPatterns` 匹配 GitLab 分支中的文件
+2. 自动提取匹配的 YML 文件所在目录路径
+3. 多个路径用换行符拼接后传递给 Xanadu API
+
+```bash
+i18n-translate-tool submit-xanadu [选项]
+```
+
+**必需选项：**
+- `--branch <name>` - GitLab 分支名称
+
+**场景 A（已有项目）：**
+- `--xanadu-project-id <id>` - Xanadu 项目 ID
+
+**场景 B（创建新项目）：**
+- `--create-project` - 创建新项目标志
+- `--project-name <name>` - 项目名称（创建项目时使用，如: XDR-1.0.0）
+- `--product-id <id>` - 产品 ID（可选，默认从配置读取）
+
+**其他选项：**
+- `--target <language>` - 目标语言代码（默认: en-US）
+- `--config <path>` - 配置文件路径
+- `--verbose` - 启用详细输出
+
+**环境变量：**
+```bash
+export XANADU_TOKEN=your_jwt_token
+```
+
+**配置示例：**
+```javascript
+module.exports = {
+  submission: {
+    gitlab: {
+      url: 'http://code.sangfor.org',
+      projectId: 30536,
+      token: process.env.GITLAB_TOKEN,
+    },
+    xanadu: {
+      url: 'https://i18n.sangfor.org',
+      taskType: 'Front-End',
+      sourceLang: 'zh-CN',
+      targetLang: 'en-US',
+      personnel: {
+        prDockerId: 26,
+        translationDockerId: 26,
+        commitDockerId: 26,
+        managerId: 26,
+        feDockerId: 26,
+      },
+      project: {
+        productId: 20,          // 产品 ID（创建项目时使用）
+        level: 'normal',        // normal | high | low
+        versionType: 'oversea', // oversea | domestic
+      },
+    },
+  },
+};
+```
+
+**使用示例：**
+
+场景 A - 使用已有项目创建任务：
+```bash
+i18n-translate-tool submit-xanadu \
+  --branch translations-20260318-143000 \
+  --yml-path "app/shop/config/locales/zh-CN/entries" \
+  --xanadu-project-id 1756
+```
+
+场景 B - 创建新项目并创建任务：
+```bash
+i18n-translate-tool submit-xanadu \
+  --branch translations-20260318-143000 \
+  --yml-path "app/shop/config/locales/zh-CN/entries" \
+  --create-project \
+  --project-name "XDR-1.0.0"
+```
+
+### pull - 从 GitLab 拉取翻译
+
+从 GitLab 仓库拉取翻译并填充到本地文件。
+
+```bash
+i18n-translate-tool pull [选项]
+```
+
+**选项：**
+- `--target <language>` - 目标语言代码（默认: en-US）
+- `--branch <name>` - GitLab 分支名称（必需）
+- `--filter <path>` - 过滤到特定目录
+- `--config <path>` - 配置文件路径
+- `--verbose` - 启用详细输出
+- `--dry-run` - 预览变更
+
+**使用示例：**
+```bash
+i18n-translate-tool pull \
+  --branch translations-20260318-143000 \
+  --target=en-US \
+  --filter=app/shop
+```
+
 ## 工作流程
 
 ### 典型使用流程
@@ -261,6 +471,44 @@ i18n-translate-tool reuse --apply --target=en-US
    ```
 
 5. **翻译**：翻译人员填充剩余的空字符串
+
+6. **重复**：继续开发，重复步骤 1-5
+
+### GitLab + Xanadu 集成工作流
+
+适用于需要将翻译提交到 GitLab 并通过 Xanadu 平台进行翻译管理的场景：
+
+1. **开发阶段**：在基础语言文件中添加/修改翻译键
+
+2. **提取并提交到 GitLab**：
+   ```bash
+   # 提取待翻译词条并创建 GitLab 分支
+   i18n-translate-tool submit-gitlab --target=en-US
+   ```
+
+3. **同步到 Xanadu 创建翻译任务**：
+   ```bash
+   # 场景 A: 使用已有 Xanadu 项目
+   i18n-translate-tool submit-xanadu \
+     --branch translations-20260318-143000 \
+     --yml-path "app/shop/config/locales/zh-CN/entries" \
+     --xanadu-project-id 1756
+
+   # 场景 B: 创建新项目
+   i18n-translate-tool submit-xanadu \
+     --branch translations-20260318-143000 \
+     --yml-path "app/shop/config/locales/zh-CN/entries" \
+     --create-project
+   ```
+
+4. **翻译完成**：在 Xanadu 平台完成翻译后，翻译会自动提交回 GitLab
+
+5. **拉取翻译到本地**：
+   ```bash
+   i18n-translate-tool pull \
+     --branch translations-20260318-143000 \
+     --target=en-US
+   ```
 
 6. **重复**：继续开发，重复步骤 1-5
 
@@ -345,6 +593,7 @@ npm test
 - ✅ 翻译复用（应用翻译）
 - ✅ 翻译复用（忽略值）
 - ✅ 翻译复用（一键模式）
+- ✅ GitLab 集成（URL 格式）
 - ✅ 配置错误处理
 
 ## 常见问题
@@ -391,6 +640,31 @@ scanPatterns: [
 - 如果只有一个翻译，自动填充
 - 如果有多个翻译，生成建议供你选择
 - 支持自定义忽略值列表（如 TODO、- 等）
+
+### Q: 如何配置 Xanadu 集成？
+
+1. 在配置文件中添加 `submission.xanadu` 配置（见配置说明）
+2. 设置环境变量 `XANADU_TOKEN`：
+   ```bash
+   export XANADU_TOKEN=your_jwt_token
+   ```
+3. 确保 `submission.gitlab.projectId` 已配置（数字类型）
+
+### Q: Xanadu 项目和 GitLab 项目的关系？
+
+- `submission.gitlab.projectId` - GitLab 项目 ID（数字）
+- `submission.xanadu` 中不包含项目 ID，需要通过 `--xanadu-project-id` 传入或 `--create-project` 创建
+- 一个 GitLab 项目可以对应多个 Xanadu 项目（不同产品/版本）
+
+### Q: submit-xanadu 命令的两种场景如何选择？
+
+**场景 A**（`--xanadu-project-id`）：
+- 已有 Xanadu 项目，只需创建新的翻译任务
+- 适用于常规迭代，在现有项目中添加新任务
+
+**场景 B**（`--create-project`）：
+- 没有 Xanadu 项目，需要新建
+- 适用于新项目首次接入 Xanadu
 
 ## 许可证
 

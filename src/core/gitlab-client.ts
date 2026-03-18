@@ -27,7 +27,7 @@ export class GitLabClient {
     this.logger.verboseLog(`创建分支: ${branchName} (from ${ref})`);
 
     try {
-      await this.gitlab.Branches.create(this.config.project, branchName, ref);
+      await this.gitlab.Branches.create(this.config.projectId, branchName, ref);
       this.logger.success(`分支创建成功: ${branchName}`);
     } catch (error) {
       if (error instanceof Error) {
@@ -52,7 +52,7 @@ export class GitLabClient {
       // GitLab API 会自动处理路径编码，不需要手动编码
 
       await this.gitlab.RepositoryFiles.create(
-        this.config.project,
+        this.config.projectId,
         filePath,
         branchName,
         content,
@@ -88,7 +88,7 @@ export class GitLabClient {
 
       // 使用单个 commit 提交所有文件
       await this.gitlab.Commits.create(
-        this.config.project,
+        this.config.projectId,
         branchName,
         commitMessage,
         actions
@@ -109,7 +109,7 @@ export class GitLabClient {
    */
   async checkAccess(): Promise<boolean> {
     try {
-      await this.gitlab.Projects.show(this.config.project);
+      await this.gitlab.Projects.show(this.config.projectId);
       return true;
     } catch {
       return false;
@@ -118,10 +118,15 @@ export class GitLabClient {
 
   /**
    * 生成查看分支的 URL
+   * 通过 projectId 获取项目路径后生成
    */
-  getBranchUrl(branchName: string): string {
+  async getBranchUrl(branchName: string): Promise<string> {
+    // 获取项目信息
+    const project = await this.gitlab.Projects.show(this.config.projectId);
+    const projectPath = project.path_with_namespace;
+
     const separator = this.config.legacyUrlFormat ? '' : '/-';
-    return `${this.config.url}/${this.config.project}${separator}/tree/${branchName}`;
+    return `${this.config.url}/${projectPath}${separator}/tree/${branchName}`;
   }
 
   /**

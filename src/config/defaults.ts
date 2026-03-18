@@ -35,10 +35,28 @@ export const DEFAULT_CONFIG: I18nConfig = {
     outputDir: 'i18n-translate-submission',
     gitlab: {
       url: 'https://gitlab.example.com',
-      project: 'group/i18n-translations',
+      projectId: 0, // GitLab 项目 ID（数字）
       token: process.env.GITLAB_TOKEN || '',
       basePath: '',
       legacyUrlFormat: false, // 默认使用新版 GitLab URL 格式
+    },
+    xanadu: {
+      url: 'https://i18n.sangfor.org',
+      taskType: 'Front-End',
+      sourceLang: 'zh-CN',
+      targetLang: 'en-US',
+      personnel: {
+        prDockerId: 0,
+        translationDockerId: 0,
+        commitDockerId: 0,
+        managerId: 0,
+        feDockerId: 0,
+      },
+      project: {
+        productId: 0,
+        level: 'normal',
+        versionType: 'oversea',
+      },
     },
   },
 };
