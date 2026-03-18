@@ -66,11 +66,11 @@ export const command = new Command('submit-xanadu')
         );
       }
 
-      // 获取 Xanadu Token
-      const token = process.env.XANADU_TOKEN;
-      if (!token) {
+      // 获取 Xanadu Cookie
+      const cookie = process.env.XANADU_COOKIE;
+      if (!cookie) {
         throw new Error(
-          'XANADU_TOKEN 环境变量未设置，请设置环境变量: export XANADU_TOKEN=your_token'
+          'XANADU_COOKIE 环境变量未设置，请设置环境变量: export XANADU_COOKIE=your_cookie'
         );
       }
 
@@ -94,13 +94,13 @@ export const command = new Command('submit-xanadu')
       }
 
       // 创建 Xanadu 客户端
-      const xanaduClient = new XanaduClient(xanaduConfig, gitlabConfig, token, logger);
+      const xanaduClient = new XanaduClient(xanaduConfig, gitlabConfig, cookie, logger);
 
       // 验证 Token
       logger.section('\n🔐 验证 Xanadu 访问权限...');
       const hasAccess = await xanaduClient.checkAuth();
       if (!hasAccess) {
-        throw new Error('Xanadu Token 验证失败，请检查 XANADU_TOKEN 是否正确');
+        throw new Error('Xanadu Cookie 验证失败，请检查 XANADU_COOKIE 是否正确');
       }
       logger.success('Xanadu 访问权限验证成功');
 

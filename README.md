@@ -370,7 +370,7 @@ i18n-translate-tool submit-xanadu [选项]
 
 **环境变量：**
 ```bash
-export XANADU_TOKEN=your_jwt_token
+export XANADU_COOKIE=your_cookie
 ```
 
 **配置示例：**
@@ -643,9 +643,9 @@ scanPatterns: [
 ### Q: 如何配置 Xanadu 集成？
 
 1. 在配置文件中添加 `submission.xanadu` 配置（见配置说明）
-2. 设置环境变量 `XANADU_TOKEN`：
+2. 设置环境变量 `XANADU_COOKIE`：
    ```bash
-   export XANADU_TOKEN=your_jwt_token
+   export XANADU_COOKIE=your_cookie
    ```
 3. 确保 `submission.gitlab.projectId` 已配置（数字类型）
 

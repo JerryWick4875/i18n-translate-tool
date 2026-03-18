@@ -68,18 +68,18 @@ export interface CreateTaskOptions {
 export class XanaduClient {
   private config: XanaduConfig;
   private gitlabConfig: GitLabConfig;
-  private token: string;
+  private cookie: string;
   private logger: Logger;
 
   constructor(
     config: XanaduConfig,
     gitlabConfig: GitLabConfig,
-    token: string,
+    cookie: string,
     logger: Logger
   ) {
     this.config = config;
     this.gitlabConfig = gitlabConfig;
-    this.token = token;
+    this.cookie = cookie;
     this.logger = logger;
   }
 
@@ -89,7 +89,7 @@ export class XanaduClient {
   private getHeaders(): Record<string, string> {
     return {
       'Content-Type': 'application/json',
-      'Cookie': `ep_jwt_token=${this.token}`,
+      'Cookie': this.cookie,
     };
   }
 
