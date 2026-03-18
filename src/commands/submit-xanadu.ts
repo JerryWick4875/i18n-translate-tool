@@ -109,7 +109,10 @@ export const command = new Command('submit-xanadu')
         // 场景 B: 创建新项目
         logger.info('创建新项目模式');
 
-        const productId = options.productId ? parseInt(options.productId, 10) : 0;
+        // 优先使用命令行传入的 productId，否则使用配置文件中的值
+        const productId = options.productId
+          ? parseInt(options.productId, 10)
+          : xanaduConfig.project?.productId ?? 0;
         const projectName = options.createXanaduProjectName;
 
         projectId = await xanaduClient.createProject({

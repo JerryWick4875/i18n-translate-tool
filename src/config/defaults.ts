@@ -53,6 +53,7 @@ export const DEFAULT_CONFIG: I18nConfig = {
         feDockerId: 0,
       },
       project: {
+        productId: 0, // 产品 ID，创建项目时使用
         level: 'normal',
         versionType: 'oversea',
       },

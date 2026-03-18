@@ -79,6 +79,7 @@ module.exports = {
   //       feDockerId: 102,                 // 前端人员 ID
   //     },
   //     project: {                         // 项目配置
+  //       productId: 20,                   // 产品 ID（创建项目时使用）
   //       level: 'normal',                 // 优先级: normal | high | low
   //       versionType: 'oversea',          // 版本类型: oversea | domestic
   //     },

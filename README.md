@@ -210,7 +210,7 @@ module.exports = {
 - `sourceLang` - 源语言（默认: zh-CN）
 - `targetLang` - 目标语言（默认: en-US）
 - `personnel` - 人员配置（prDockerId, translationDockerId, commitDockerId, managerId, feDockerId）
-- `project` - 项目配置（level, versionType）
+- `project` - 项目配置（productId, level, versionType）
 
 ## 命令使用
 
@@ -360,7 +360,7 @@ i18n-translate-tool submit-xanadu [选项]
 
 **场景 B（创建新项目）：**
 - `--create-xanadu-project-name <name>` - 创建新的 Xanadu 项目并指定名称（如: XDR-1.0.0）
-- `--product-id <id>` - 产品 ID（可选，默认从配置读取）
+- `--product-id <id>` - 产品 ID（可选，默认从配置读取，此参数会覆盖配置文件中的 productId）
 
 **其他选项：**
 - `--target <language>` - 目标语言代码（默认: en-US）

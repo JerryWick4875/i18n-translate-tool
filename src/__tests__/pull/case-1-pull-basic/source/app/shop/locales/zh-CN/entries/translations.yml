@@ -1,0 +1,5 @@
+product.name: "商品名称"
+product.description: "商品描述"
+product.price: "价格"
+cart.title: "购物车"
+cart.empty: "购物车为空"
