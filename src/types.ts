@@ -244,7 +244,7 @@ export interface XanaduProjectConfig {
  * Xanadu 配置
  */
 export interface XanaduConfig {
-  url: string; // 默认: https://i18n.sangfor.org
+  url: string; // 默认: http://i18n.sangfor.com
   taskType?: string; // 默认: "Front-End"
   sourceLang?: string; // 默认: "zh-CN"
   targetLang?: string; // 默认: "en-US"

@@ -176,7 +176,7 @@ module.exports = {
 
     // Xanadu 翻译平台配置
     xanadu: {
-      url: 'https://i18n.sangfor.org',
+      url: 'http://i18n.sangfor.com',
       taskType: 'Front-End',
       sourceLang: 'zh-CN',
       targetLang: 'en-US',
@@ -205,7 +205,7 @@ module.exports = {
 - `legacyUrlFormat` - 可选，使用老版本 GitLab URL 格式
 
 **Xanadu 配置说明：**
-- `url` - Xanadu 服务器地址（默认: https://i18n.sangfor.org）
+- `url` - Xanadu 服务器地址（默认: http://i18n.sangfor.com）
 - `taskType` - 任务类型（默认: Front-End）
 - `sourceLang` - 源语言（默认: zh-CN）
 - `targetLang` - 目标语言（默认: en-US）
@@ -383,7 +383,7 @@ module.exports = {
       token: process.env.GITLAB_TOKEN,
     },
     xanadu: {
-      url: 'https://i18n.sangfor.org',
+      url: 'http://i18n.sangfor.com',
       taskType: 'Front-End',
       sourceLang: 'zh-CN',
       targetLang: 'en-US',

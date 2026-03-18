@@ -41,7 +41,7 @@ export const DEFAULT_CONFIG: I18nConfig = {
       legacyUrlFormat: false, // 默认使用新版 GitLab URL 格式
     },
     xanadu: {
-      url: 'https://i18n.sangfor.org',
+      url: 'http://i18n.sangfor.com',
       taskType: 'Front-End',
       sourceLang: 'zh-CN',
       targetLang: 'en-US',

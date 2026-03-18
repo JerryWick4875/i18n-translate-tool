@@ -16,7 +16,9 @@ export interface CreateProjectResponse {
 export interface ProjectInfo {
   id: number;
   name: string;
+  product_name: string;
   gitlab_project_id?: string;
+  transfer_time: number;
 }
 
 /**
@@ -99,12 +101,12 @@ export class XanaduClient {
   async checkAuth(): Promise<boolean> {
     try {
       // 通过查询项目列表来验证 Token
-      const response = await fetch(`${this.config.url}/api/project/page`, {
+      const response = await fetch(`${this.config.url}/api/project/list`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({
+          limit: 1,
           page: 1,
-          pageSize: 1,
         }),
       });
 
@@ -116,16 +118,23 @@ export class XanaduClient {
 
   /**
    * 查找项目 ID
-   * 根据 GitLab 项目 ID 查找 Xanadu 中的项目 ID
+   * 根据项目名称、产品名、GitLab 项目 ID 和 transfer_time 精确匹配
    */
-  async findProjectId(gitlabProjectId: number): Promise<number | null> {
+  async findProjectId(
+    gitlabProjectId: number,
+    projectName: string,
+    productName: string,
+    transferTime: number
+  ): Promise<number | null> {
     try {
-      const response = await fetch(`${this.config.url}/api/project/page`, {
+      // 使用项目名称作为搜索关键词
+      const response = await fetch(`${this.config.url}/api/project/list`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({
+          limit: 100,
           page: 1,
-          pageSize: 100,
+          search: projectName,
         }),
       });
 
@@ -133,14 +142,23 @@ export class XanaduClient {
         throw new Error(`Failed to fetch projects: ${response.statusText}`);
       }
 
-      const result = await response.json() as { code: number; msg: string; data?: { data?: ProjectInfo[] } };
+      const result = await response.json() as {
+        code: number;
+        msg: string;
+        data?: { list?: ProjectInfo[] };
+      };
       if (result.code !== 0) {
         throw new Error(`API error: ${result.msg}`);
       }
 
-      // 在项目中查找匹配的 gitlab_project_id
-      const projects: ProjectInfo[] = result.data?.data || [];
-      const project = projects.find((p) => p.gitlab_project_id === String(gitlabProjectId));
+      // 精确匹配：产品名、GitLab 项目 ID、transfer_time
+      const projects: ProjectInfo[] = result.data?.list || [];
+      const project = projects.find(
+        (p) =>
+          p.product_name === productName &&
+          p.gitlab_project_id === String(gitlabProjectId) &&
+          p.transfer_time === transferTime
+      );
 
       return project?.id || null;
     } catch (error) {
@@ -199,7 +217,14 @@ export class XanaduClient {
       this.logger.success(`项目创建成功: ${result.data}`);
 
       // 创建项目后需要查询获取项目 ID
-      const projectId = await this.findProjectId(options.gitlabProjectId);
+      // 使用产品名、GitLab 项目 ID 和 transfer_time 精确匹配
+      const productName = result.data;
+      const projectId = await this.findProjectId(
+        options.gitlabProjectId,
+        options.projectName,
+        productName,
+        now
+      );
       if (!projectId) {
         throw new Error('项目创建成功但无法获取项目 ID，请稍后重试');
       }
