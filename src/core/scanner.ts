@@ -34,8 +34,9 @@ export class LocaleScanner {
       const variableNames: string[] = [];
 
       // 将 (* as name) 替换为正则表达式捕获组（必须在转义之前完成）
+      // 使用 [^/\\]+ 匹配路径段（同时处理 Unix / 和 Windows \
       let regexStr = pattern
-        .replace(/\(\*\s+as\s+([^\/\s]+)\)/g, (_, name) => {
+        .replace(/\(\*\s+as\s+([^\/\\\s]+)\)/g, (_, name) => {
           variableNames.push(name);
           return '###CAPTURE###';  // 临时占位符
         })
@@ -43,9 +44,9 @@ export class LocaleScanner {
         .replace(/[.+?^${}|[\]\\]/g, '\\$&')
         // 替换 ** 和 * 模式（对于 (* as name)，* 已被替换）
         .replace(/\*{2,}/g, '.*')
-        .replace(/\*/g, '[^/]*')
-        // 将占位符替换为捕获组
-        .replace(/###CAPTURE###/g, '([^/]+)');
+        .replace(/\*/g, '[^/\\\\]*')
+        // 将占位符替换为捕获组 - 匹配任何非路径分隔符字符
+        .replace(/###CAPTURE###/g, '([^/\\\\]+)');
 
       return {
         original: pattern,
@@ -85,7 +86,9 @@ export class LocaleScanner {
    * 向后兼容的默认 app 提取
    */
   private extractDefaultApp(relativePath: string): string {
-    const appMatch = relativePath.match(/\/([^/]+)\//);
+    // 规范化路径后使用正则匹配（支持 / 和 \）
+    const normalizedPath = normalizePath(relativePath);
+    const appMatch = normalizedPath.match(/[/\\]([^/\\]+)[/\\]/);
     return appMatch ? appMatch[1] : 'default';
   }
 
@@ -104,7 +107,7 @@ export class LocaleScanner {
       // 将模式转换回 glob 供 glob 库使用
       // 将 (* as name) 替换为 * 以进行 glob 匹配
       const globPattern = parsed.original
-        .replace(/\(\*\s+as\s+[^\/\s]+\)/g, '*');
+        .replace(/\(\*\s+as\s+[^\/\\\s]+\)/g, '*');
 
       const absolutePattern = path.isAbsolute(globPattern)
         ? globPattern

@@ -231,7 +231,9 @@ export class GitLabFetcher {
     targetLanguage: string
   ): string | null {
     // 检查路径中是否包含语言代码
-    const pathParts = filePath.split('/');
+    // 使用 normalizePath 确保路径分隔符一致（GitLab 路径使用 /）
+    const normalizedPath = filePath.replace(/\\/g, '/');
+    const pathParts = normalizedPath.split('/');
 
     // 查找语言代码
     for (const part of pathParts) {
@@ -338,23 +340,26 @@ export class GitLabFetcher {
   /**
    * 将 scanPattern 转换为匹配 GitLab 文件路径的正则表达式
    * 示例: app/(* as app)/config/locales/(* as locale)/*.yml
-   * 转换为: ^app/([^/]+)/config/locales/([^/]+)/[^/]+\.yml$
+   * 转换为: ^app/([^/\\]+)/config/locales/([^/\\]+)/[^/\\]+\.yml$
+   *
+   * 注意：使用 [^/\\]+ 同时匹配 Unix (/) 和 Windows (\) 路径分隔符
    */
   private patternToRegex(pattern: string): RegExp {
     // 按正确顺序处理 pattern
     let regexStr = pattern
       // 1. 首先替换 (* as name) 为占位符，避免被后续处理
-      .replace(/\(\*\s+as\s+([^\/\s]+)\)/g, '###CAPTURE###')
+      // 匹配变量名时允许 / 和 \ 作为分隔符
+      .replace(/\(\*\s+as\s+([^\/\\\s]+)\)/g, '###CAPTURE###')
       // 2. 替换 ** 为多级通配符
       .replace(/\*\*/g, '###DBLSTAR###')
       // 3. 替换 * 为单级通配符
       .replace(/\*/g, '###STAR###')
       // 4. 转义特殊正则表达式字符
       .replace(/[.+?^${}()|[\]\\]/g, '\\$&')
-      // 5. 恢复占位符为正确的正则
-      .replace(/###CAPTURE###/g, '([^/]+)')
+      // 5. 恢复占位符为正确的正则 - 匹配任何非路径分隔符字符
+      .replace(/###CAPTURE###/g, '([^/\\\\]+)')
       .replace(/###DBLSTAR###/g, '.*')
-      .replace(/###STAR###/g, '[^/]*');
+      .replace(/###STAR###/g, '[^/\\\\]*');
 
     return new RegExp('^' + regexStr + '$');
   }

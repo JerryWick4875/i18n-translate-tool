@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { execSync } from 'child_process';
+import * as os from 'os';
 
 export interface TestCase {
   name: string;
@@ -14,17 +14,13 @@ export interface TestCase {
  * Copy source directory to temp directory
  */
 export async function copyToTemp(sourceDir: string): Promise<string> {
-  const tempDir = `/tmp/i18n-test-${Date.now()}`;
+  // Use os.tmpdir() for cross-platform temp directory
+  const tempDir = path.join(os.tmpdir(), `i18n-test-${Date.now()}`);
   // Convert sourceDir to absolute path
   const absoluteSourceDir = path.resolve(sourceDir);
 
-  // Use rsync or cp with proper flags to include hidden files
-  try {
-    execSync(`rsync -a "${absoluteSourceDir}/" "${tempDir}/"`);
-  } catch {
-    // Fallback to cp if rsync not available
-    execSync(`cp -r "${absoluteSourceDir}/." "${tempDir}/"`);
-  }
+  // Use fs.cp for cross-platform directory copying (Node.js 16+)
+  await fs.cp(absoluteSourceDir, tempDir, { recursive: true });
   return tempDir;
 }
 
@@ -115,7 +111,8 @@ export async function compareDirs(
  * Cleanup temp directory
  */
 export async function cleanupTemp(tempDir: string): Promise<void> {
-  execSync(`rm -rf "${tempDir}"`);
+  // Use fs.rm for cross-platform directory removal (Node.js 14.14+)
+  await fs.rm(tempDir, { recursive: true, force: true });
 }
 
 /**
