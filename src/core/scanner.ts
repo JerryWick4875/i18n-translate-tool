@@ -21,7 +21,7 @@ export class LocaleScanner {
   private parsedPatterns: ParsedPattern[];
 
   constructor(basePath: string, patterns: string[] = []) {
-    this.basePath = path.resolve(basePath);
+    this.basePath = normalizePath(path.resolve(basePath));
     this.parsedPatterns = this.parsePatterns(patterns);
   }
 
