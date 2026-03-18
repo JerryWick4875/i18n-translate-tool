@@ -11,9 +11,8 @@ import { GitLabFetcher } from '../core/gitlab-fetcher';
 interface SubmitXanaduOptions {
   branch: string;
   xanaduProjectId?: string;
-  createProject?: boolean;
   productId?: string;
-  projectName?: string;
+  createXanaduProjectName?: string;
   target?: string;
   config?: string;
   verbose?: boolean;
@@ -23,9 +22,8 @@ export const command = new Command('submit-xanadu')
   .description('将 GitLab 翻译分支同步到 Xanadu 翻译平台')
   .requiredOption('--branch <name>', 'GitLab 分支名称')
   .option('--xanadu-project-id <id>', 'Xanadu 项目 ID（已有项目时使用）')
-  .option('--create-project', '创建新项目')
   .option('--product-id <id>', '产品 ID（创建项目时使用）')
-  .option('--project-name <name>', '项目名称（创建项目时使用，如: XDR-1.0.0）')
+  .option('--create-xanadu-project-name <name>', '创建新的 Xanadu 项目并指定名称（如: XDR-1.0.0）')
   .option('--target <language>', '目标语言代码', 'en-US')
   .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
@@ -107,17 +105,12 @@ export const command = new Command('submit-xanadu')
       // 确定项目 ID
       let projectId: number;
 
-      if (options.createProject) {
+      if (options.createXanaduProjectName) {
         // 场景 B: 创建新项目
         logger.info('创建新项目模式');
 
         const productId = options.productId ? parseInt(options.productId, 10) : 0;
-        const projectName = options.projectName;
-
-        // 创建项目时必须有项目名称
-        if (!projectName) {
-          throw new Error('创建项目时必须指定 --project-name（项目名称，如: XDR-1.0.0）');
-        }
+        const projectName = options.createXanaduProjectName;
 
         projectId = await xanaduClient.createProject({
           gitlabProjectId: gitlabConfig.projectId,
@@ -139,7 +132,7 @@ export const command = new Command('submit-xanadu')
         logger.info(`项目 ID: ${projectId}`);
       } else {
         // 不应该到达这里，因为 validateOptions 已经检查了
-        throw new Error('请指定 --xanadu-project-id 或 --create-project');
+        throw new Error('请指定 --xanadu-project-id 或 --create-xanadu-project-name');
       }
 
       // 创建翻译任务
@@ -184,14 +177,14 @@ function validateOptions(options: SubmitXanaduOptions): void {
 
   // 检查场景参数
   const hasXanaduProjectId = !!options.xanaduProjectId;
-  const hasCreateProject = !!options.createProject;
+  const hasCreateProjectName = !!options.createXanaduProjectName;
 
-  if (hasXanaduProjectId && hasCreateProject) {
-    errors.push('不能同时指定 --xanadu-project-id 和 --create-project，请选择一个');
+  if (hasXanaduProjectId && hasCreateProjectName) {
+    errors.push('不能同时指定 --xanadu-project-id 和 --create-xanadu-project-name，请选择一个');
   }
 
-  if (!hasXanaduProjectId && !hasCreateProject) {
-    errors.push('请指定 --xanadu-project-id（使用已有项目）或 --create-project（创建新项目）');
+  if (!hasXanaduProjectId && !hasCreateProjectName) {
+    errors.push('请指定 --xanadu-project-id（使用已有项目）或 --create-xanadu-project-name（创建新项目）');
   }
 
   if (errors.length > 0) {

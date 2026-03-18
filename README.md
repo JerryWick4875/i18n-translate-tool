@@ -359,8 +359,7 @@ i18n-translate-tool submit-xanadu [选项]
 - `--xanadu-project-id <id>` - Xanadu 项目 ID
 
 **场景 B（创建新项目）：**
-- `--create-project` - 创建新项目标志
-- `--project-name <name>` - 项目名称（创建项目时使用，如: XDR-1.0.0）
+- `--create-xanadu-project-name <name>` - 创建新的 Xanadu 项目并指定名称（如: XDR-1.0.0）
 - `--product-id <id>` - 产品 ID（可选，默认从配置读取）
 
 **其他选项：**
@@ -419,8 +418,7 @@ i18n-translate-tool submit-xanadu \
 i18n-translate-tool submit-xanadu \
   --branch translations-20260318-143000 \
   --yml-path "app/shop/config/locales/zh-CN/entries" \
-  --create-project \
-  --project-name "XDR-1.0.0"
+  --create-xanadu-project-name "XDR-1.0.0"
 ```
 
 ### pull - 从 GitLab 拉取翻译
@@ -496,8 +494,7 @@ i18n-translate-tool pull \
    # 场景 B: 创建新项目
    i18n-translate-tool submit-xanadu \
      --branch translations-20260318-143000 \
-     --yml-path "app/shop/config/locales/zh-CN/entries" \
-     --create-project
+     --create-xanadu-project-name "XDR-1.0.0"
    ```
 
 4. **翻译完成**：在 Xanadu 平台完成翻译后，翻译会自动提交回 GitLab
@@ -652,7 +649,7 @@ scanPatterns: [
 ### Q: Xanadu 项目和 GitLab 项目的关系？
 
 - `submission.gitlab.projectId` - GitLab 项目 ID（数字）
-- `submission.xanadu` 中不包含项目 ID，需要通过 `--xanadu-project-id` 传入或 `--create-project` 创建
+- `submission.xanadu` 中不包含项目 ID，需要通过 `--xanadu-project-id` 传入或 `--create-xanadu-project-name` 创建
 - 一个 GitLab 项目可以对应多个 Xanadu 项目（不同产品/版本）
 
 ### Q: submit-xanadu 命令的两种场景如何选择？
@@ -661,7 +658,7 @@ scanPatterns: [
 - 已有 Xanadu 项目，只需创建新的翻译任务
 - 适用于常规迭代，在现有项目中添加新任务
 
-**场景 B**（`--create-project`）：
+**场景 B**（`--create-xanadu-project-name`）：
 - 没有 Xanadu 项目，需要新建
 - 适用于新项目首次接入 Xanadu
 

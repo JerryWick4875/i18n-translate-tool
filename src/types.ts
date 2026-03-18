@@ -232,7 +232,7 @@ export interface XanaduPersonnelConfig {
 
 /**
  * Xanadu 项目配置
- * 注：productVersion 作为项目名称，通过 --project-name 参数传入
+ * 注：productVersion 作为项目名称，通过 --create-xanadu-project-name 参数传入
  * 注：productId 通过 --product-id 参数传入，不在配置文件中配置
  */
 export interface XanaduProjectConfig {
