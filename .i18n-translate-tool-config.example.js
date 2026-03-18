@@ -69,8 +69,8 @@ module.exports = {
   //
   //   // Xanadu 配置（用于提交到翻译平台）
   //   xanadu: {
-  //     sourceLang: 'zh',                  // 源语言代码
-  //     targetLang: 'en',                  // 目标语言代码
+  //     sourceLang: 'zh-CN',               // 源语言代码
+  //     targetLang: 'en-US',               // 目标语言代码
   //     personnel: {                       // 人员配置（Docker ID）
   //       prDockerId: 123,                 // PR 人员 ID
   //       translationDockerId: 456,        // 翻译人员 ID
