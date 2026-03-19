@@ -25,7 +25,7 @@ export const command = new Command('submit-gitlab')
       const configPath = path.resolve(options.config);
       const configDir = path.dirname(configPath);
 
-      logger.section('\n🚀 i18n-tool submit-gitlab');
+      logger.section('\n🚀 i18n-translate-tool submit-gitlab');
 
       // 加载配置
       const config = await loadConfig(configDir, configPath);

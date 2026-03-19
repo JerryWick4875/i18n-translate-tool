@@ -22,7 +22,7 @@ export const command = new Command('pull')
 
       try {
         // 加载配置
-        console.log('\n🚀 i18n-tool pull');
+        console.log('\n🚀 i18n-translate-tool pull');
 
         const configPath = path.resolve(options.config);
         const configDir = path.dirname(configPath);

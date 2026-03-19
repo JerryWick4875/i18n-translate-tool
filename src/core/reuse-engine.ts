@@ -299,7 +299,7 @@ export class ReuseEngine {
     data: ReuseSuggestionsData
   ): Promise<void> {
     const lines: string[] = [
-      '# i18n-tool 翻译复用建议文件',
+      '# i18n-translate-tool 翻译复用建议文件',
       `# 生成时间: ${data.generatedAt}`,
       `# 目标语言: ${data.locale}`,
       '#',

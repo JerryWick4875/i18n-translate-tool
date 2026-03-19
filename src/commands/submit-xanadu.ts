@@ -31,7 +31,7 @@ export const command = new Command('submit-xanadu')
     try {
       const logger = new Logger(options.verbose, false);
 
-      logger.section('\n🚀 i18n-tool submit-xanadu');
+      logger.section('\n🚀 i18n-translate-tool submit-xanadu');
 
       // 验证参数
       validateOptions(options);
