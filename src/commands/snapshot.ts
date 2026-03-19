@@ -9,7 +9,7 @@ import * as path from 'path';
 
 export const command = new Command('snapshot')
   .description('创建基础语言的快照用于目标语言')
-  .option('--target <language>', '目标语言代码 (例如: en-US)', 'en-US')
+  .option('--target <language>', '目标语言代码 (例如: en-US)')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
   .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
@@ -21,6 +21,9 @@ export const command = new Command('snapshot')
 
       const config = await loadConfig(cwd, options.config);
       const basePath = cwd;
+
+      // 如果没有指定 target，使用配置文件中的默认值
+      const target = options.target || config.defaultTarget || 'en-US';
 
       const scanner = new LocaleScanner(basePath);
       let files = await scanner.scan(config.scanPatterns);
@@ -76,12 +79,12 @@ export const command = new Command('snapshot')
         const variables = baseFiles[0]?.variables || {};
 
         if (options.dryRun) {
-          const snapshotPath = snapshotManager.getSnapshotPath(group, options.target, variables);
+          const snapshotPath = snapshotManager.getSnapshotPath(group, target, variables);
           logger.dryRun(`将创建快照: ${snapshotPath}`);
           logger.info(`文件: ${baseData.size}, 键数: ${Array.from(baseData.values()).reduce((sum, obj) => sum + Object.keys(obj).length, 0)}`);
         } else {
-          await snapshotManager.createSnapshot(group, options.target, baseData, variables);
-          logger.success(`快照已创建: ${options.target} for ${group}`);
+          await snapshotManager.createSnapshot(group, target, baseData, variables);
+          logger.success(`快照已创建: ${target} for ${group}`);
         }
       }
 

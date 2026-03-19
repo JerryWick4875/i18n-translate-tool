@@ -10,7 +10,7 @@ import { PullOptions, PullResult, I18nConfig } from '../types';
 export const command = new Command('pull')
   .description('从 GitLab 拉取翻译并填充到本地文件')
   .requiredOption('--branch <branch-name>', 'GitLab 分支名称')
-  .option('--target <language>', '目标语言代码', 'en-US')
+  .option('--target <language>', '目标语言代码')
   .option('--filter <path>', '过滤到特定目录')
   .option('--dry-run', '预览模式，不实际修改文件')
   .option('--force', '强制覆盖已有的翻译值')
@@ -28,6 +28,9 @@ export const command = new Command('pull')
         const configDir = path.dirname(configPath);
         const config = await loadConfig(configDir, configPath);
 
+        // 如果没有指定 target，使用配置文件中的默认值
+        const target = options.target || config.defaultTarget || 'en-US';
+
         // 验证 GitLab 配置
         if (!config.submission?.gitlab) {
           logger.error('错误: 缺少 GitLab 配置');
@@ -40,7 +43,7 @@ export const command = new Command('pull')
         // 构建选项
         const pullOptions: PullOptions = {
           branch: options.branch,
-          target: options.target,
+          target: target,
           basePath: configDir,
           filter: options.filter,
           dryRun: !!options.dryRun,

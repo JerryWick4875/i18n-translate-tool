@@ -62,7 +62,7 @@ export async function run() {
 
     // 步骤 4: 合并翻译
     console.log('\n💾 合并翻译...');
-    const merger = new TranslationMerger(logger);
+    const merger = new TranslationMerger(logger, config, testDir);
     const result = await merger.merge(validTranslations, false, false);
 
     console.log(`  填充词条: ${result.filledCount}`);

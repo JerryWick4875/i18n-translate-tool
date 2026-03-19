@@ -38,13 +38,13 @@ module.exports = {
   // 基础/源语言
   baseLanguage: 'zh-CN',
 
+  // 默认目标语言（各命令 --target 参数的默认值）
+  defaultTarget: 'en-US',
+
   // 快照配置
   snapshot: {
     dir: 'i18n-translate-snapshot',
   },
-
-  // 默认目标语言（可选）
-  defaultTargets: ['en-US', 'ja-JP'],
 };
 ```
 
@@ -91,7 +91,7 @@ i18n-translate-tool reuse --apply --target=en-US
 module.exports = {
   // 基础配置（所有功能共用）
   baseLanguage: 'zh-CN',
-  defaultTargets: ['en-US', 'ja-JP'],
+  defaultTarget: 'en-US',  // 各命令 --target 参数的默认值
   scanPatterns: [
     // 必须包含 (* as locale) 指定语言代码位置
     'app/(* as app)/config/locales/(* as locale)/*/*.yml',

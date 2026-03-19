@@ -129,7 +129,7 @@ function mergeConfig(
   return {
     // 基础配置
     baseLanguage: userConfig.baseLanguage || defaults.baseLanguage,
-    defaultTargets: userConfig.defaultTargets ?? defaults.defaultTargets,
+    defaultTarget: userConfig.defaultTarget ?? defaults.defaultTarget,
     scanPatterns: userConfig.scanPatterns || defaults.scanPatterns,
 
     // 输出格式配置

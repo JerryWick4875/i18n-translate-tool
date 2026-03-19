@@ -9,7 +9,7 @@ import * as fs from 'fs/promises';
 
 export const command = new Command('submit-gitlab')
   .description('提取待翻译词条并提交到 GitLab')
-  .option('--target <language>', '目标语言代码 (例如: en-US)', 'en-US')
+  .option('--target <language>', '目标语言代码 (例如: en-US)')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
   .option('--force', '强制覆盖已存在的输出目录')
   .option('--apply', '提取后提交到 GitLab')
@@ -31,6 +31,9 @@ export const command = new Command('submit-gitlab')
       const config = await loadConfig(configDir, configPath);
       const basePath = configDir;
 
+      // 如果没有指定 target，使用配置文件中的默认值
+      const target = options.target || config.defaultTarget || 'en-US';
+
       // 获取输出目录
       const outputDir = path.join(
         basePath,
@@ -47,7 +50,7 @@ export const command = new Command('submit-gitlab')
         // 创建提取器
         const extractor = new SubmissionExtractor(
           {
-            target: options.target,
+            target: target,
             basePath,
             filter: options.filter,
             verbose: options.verbose,
@@ -61,7 +64,7 @@ export const command = new Command('submit-gitlab')
         const result = await extractor.extract(
           config.scanPatterns,
           config.baseLanguage,
-          options.target,
+          target,
           outputDir
         );
 
@@ -82,7 +85,7 @@ export const command = new Command('submit-gitlab')
           // 创建提取器
           const extractor = new SubmissionExtractor(
             {
-              target: options.target,
+              target: target,
               basePath,
               filter: options.filter,
               verbose: options.verbose,
@@ -96,7 +99,7 @@ export const command = new Command('submit-gitlab')
           const result = await extractor.extract(
             config.scanPatterns,
             config.baseLanguage,
-            options.target,
+            target,
             outputDir
           );
 
@@ -111,7 +114,7 @@ export const command = new Command('submit-gitlab')
           // 创建提取器
           const extractor = new SubmissionExtractor(
             {
-              target: options.target,
+              target: target,
               basePath,
               filter: options.filter,
               verbose: options.verbose,
@@ -125,7 +128,7 @@ export const command = new Command('submit-gitlab')
           const result = await extractor.extract(
             config.scanPatterns,
             config.baseLanguage,
-            options.target,
+            target,
             outputDir
           );
 

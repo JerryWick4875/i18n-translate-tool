@@ -1,6 +1,6 @@
 module.exports = {
   baseLanguage: 'zh-CN',
-  defaultTargets: ['fr-FR', 'de-DE'],
+  defaultTarget: 'fr-FR',
   scanPatterns: [
     'custom/(* as module)/locales/(* as locale)/*.yml',
   ],

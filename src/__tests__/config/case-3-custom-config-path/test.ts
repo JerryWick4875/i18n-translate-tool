@@ -14,8 +14,7 @@ export async function run() {
   // Verify custom config values are loaded
   const checks = [
     { name: 'baseLanguage', expected: 'zh-CN', actual: result.baseLanguage },
-    { name: 'defaultTargets[0]', expected: 'fr-FR', actual: result.defaultTargets?.[0] },
-    { name: 'defaultTargets[1]', expected: 'de-DE', actual: result.defaultTargets?.[1] },
+    { name: 'defaultTarget', expected: 'fr-FR', actual: result.defaultTarget },
     { name: 'scanPatterns[0]', expected: 'custom/(* as module)/locales/(* as locale)/*.yml', actual: result.scanPatterns?.[0] },
     { name: 'snapshot.dir', expected: 'custom-snapshot-dir', actual: result.snapshot?.dir },
     { name: 'snapshot.pathPattern', expected: '{module}/{locale}.yml', actual: result.snapshot?.pathPattern },

@@ -24,7 +24,7 @@ export const command = new Command('submit-xanadu')
   .option('--xanadu-project-id <id>', 'Xanadu 项目 ID（已有项目时使用）')
   .option('--product-id <id>', '产品 ID（创建项目时使用）')
   .option('--create-xanadu-project-name <name>', '创建新的 Xanadu 项目并指定名称（如: XDR-1.0.0）')
-  .option('--target <language>', '目标语言代码', 'en-US')
+  .option('--target <language>', '目标语言代码')
   .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
   .action(async (options: SubmitXanaduOptions) => {
@@ -43,6 +43,9 @@ export const command = new Command('submit-xanadu')
       // 加载配置
       logger.info('加载配置...');
       const config = await loadConfig(configDir, configPath);
+
+      // 如果没有指定 target，使用配置文件中的默认值
+      const target = options.target || config.defaultTarget || 'en-US';
 
       // 检查 Xanadu 配置
       if (!config.submission?.xanadu) {
@@ -119,7 +122,7 @@ export const command = new Command('submit-xanadu')
           gitlabProjectId: gitlabConfig.projectId,
           gitlabDomain: gitlabConfig.url,
           sourceLang: xanaduConfig.sourceLang || 'zh-CN',
-          targetLang: options.target || xanaduConfig.targetLang || 'en-US',
+          targetLang: target || xanaduConfig.targetLang || 'en-US',
           productId,
           projectName,
           level: xanaduConfig.project?.level,
@@ -147,7 +150,7 @@ export const command = new Command('submit-xanadu')
         ymlPath: ymlPathValue,
         taskType: xanaduConfig.taskType || 'Front-End',
         sourceLang: xanaduConfig.sourceLang || 'zh-CN',
-        targetLang: options.target || xanaduConfig.targetLang || 'en-US',
+        targetLang: target || xanaduConfig.targetLang || 'en-US',
         prDockerId: xanaduConfig.personnel?.prDockerId,
         translationDockerId: xanaduConfig.personnel?.translationDockerId,
         commitDockerId: xanaduConfig.personnel?.commitDockerId,
@@ -158,7 +161,7 @@ export const command = new Command('submit-xanadu')
       logger.info(`项目 ID: ${projectId}`);
       logger.info(`分支: ${options.branch}`);
       logger.info(`YML 路径数: ${ymlPaths.length}`);
-      logger.info(`目标语言: ${options.target || xanaduConfig.targetLang || 'en-US'}`);
+      logger.info(`目标语言: ${target || xanaduConfig.targetLang || 'en-US'}`);
     } catch (error) {
       if (error instanceof Error) {
         console.error(`\n❌ 错误: ${error.message}`);

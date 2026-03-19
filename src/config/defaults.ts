@@ -6,7 +6,7 @@ import { I18nConfig } from '../types';
 export const DEFAULT_CONFIG: I18nConfig = {
   // 基础配置
   baseLanguage: 'zh-CN',
-  defaultTargets: ['en-US', 'ja-JP'],
+  defaultTarget: 'en-US',
   scanPatterns: [
     'app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml',
   ],

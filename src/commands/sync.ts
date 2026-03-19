@@ -6,7 +6,7 @@ import * as path from 'path';
 
 export const command = new Command('sync')
   .description('同步翻译更改到目标语言')
-  .option('--target <language>', '目标语言代码 (例如: en-US)', 'en-US')
+  .option('--target <language>', '目标语言代码 (例如: en-US)')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
   .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
@@ -19,11 +19,14 @@ export const command = new Command('sync')
       const config = await loadConfig(cwd, options.config);
       const basePath = cwd;
 
-      logger.section(`\n🔄 同步到 ${options.target}...`);
+      // 如果没有指定 target，使用配置文件中的默认值
+      const target = options.target || config.defaultTarget || 'en-US';
+
+      logger.section(`\n🔄 同步到 ${target}...`);
 
       const syncEngine = new SyncEngine(
         {
-          target: options.target,
+          target: target,
           basePath,
           filter: options.filter,
           verbose: options.verbose,

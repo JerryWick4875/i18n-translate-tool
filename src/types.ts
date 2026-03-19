@@ -1,7 +1,7 @@
 export interface I18nConfig {
   // 基础配置（所有功能共用）
   baseLanguage: string;
-  defaultTargets?: string[];
+  defaultTarget?: string;
   scanPatterns: string[];
 
   // 输出格式配置（所有功能共用）

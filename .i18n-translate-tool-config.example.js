@@ -6,8 +6,8 @@ module.exports = {
   // 基础/源语言代码
   baseLanguage: 'zh-CN',
 
-  // 默认目标语言列表（用于快照功能）
-  defaultTargets: ['en-US', 'ja-JP'],
+  // 默认目标语言（各命令 --target 参数的默认值）
+  defaultTarget: 'en-US',
 
   // 扫描模式 - 支持通配符和变量捕获
   // 必须包含 (* as locale) 来指定语言代码位置

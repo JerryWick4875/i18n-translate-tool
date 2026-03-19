@@ -6,7 +6,7 @@ import * as path from 'path';
 
 export const command = new Command('reuse')
   .description('复用现有翻译填充空翻译')
-  .option('--target <language>', '目标语言代码 (例如: en-US)', 'en-US')
+  .option('--target <language>', '目标语言代码 (例如: en-US)')
   .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
   .option('--output <path>', '建议文件输出路径')
   .option('--input <path>', '建议文件输入路径')
@@ -24,13 +24,16 @@ export const command = new Command('reuse')
       const config = await loadConfig(cwd, options.config);
       const basePath = cwd;
 
+      // 如果没有指定 target，使用配置文件中的默认值
+      const target = options.target || config.defaultTarget || 'en-US';
+
       // 确定输出/输入文件路径
       const outputPath = options.output || config.reuse?.outputFile || '.i18ntool-reuse.yml';
       const inputPath = options.input || config.reuse?.outputFile || '.i18ntool-reuse.yml';
 
       const reuseEngine = new ReuseEngine(
         {
-          target: options.target,
+          target: target,
           basePath,
           baseLanguage: config.baseLanguage,
           filter: options.filter,
@@ -46,9 +49,9 @@ export const command = new Command('reuse')
 
       // 判断运行模式
       if (options.apply) {
-        if (options.target !== 'en-US') {
+        if (target !== 'en-US') {
           // 一键模式：使用 --apply 和 --target
-          logger.section(`\n🚀 ${options.target} 一键模式...`);
+          logger.section(`\n🚀 ${target} 一键模式...`);
 
           const result = await reuseEngine.generateAndApply(
             config.scanPatterns,
@@ -98,7 +101,7 @@ export const command = new Command('reuse')
         }
       } else {
         // 生成模式：生成建议文件
-        logger.section(`\n🔍 为 ${options.target} 生成复用建议...`);
+        logger.section(`\n🔍 为 ${target} 生成复用建议...`);
 
         const suggestionsData = await reuseEngine.generateSuggestions(
           config.scanPatterns,

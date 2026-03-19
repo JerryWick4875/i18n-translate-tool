@@ -88,7 +88,7 @@ const SubmissionConfigSchema = z.object({
 export const I18nConfigSchema = z.object({
   // 基础配置
   baseLanguage: z.string().min(1),
-  defaultTargets: z.array(z.string().min(1)).optional(),
+  defaultTarget: z.string().min(1).optional(),
   scanPatterns: z.array(z.string()).min(1),
 
   // 功能配置
