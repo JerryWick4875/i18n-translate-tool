@@ -108,7 +108,7 @@ export const command = new Command('reuse')
 
         logger.info(`\n📝 建议已写入 ${outputPath}`);
         logger.info('编辑文件以从多选中选择，然后运行:');
-        logger.info(`  i18n-tool reuse --apply --input ${outputPath}`);
+        logger.info(`  i18n-tool reuse --apply`);
       }
 
       logger.success('\n✅ 翻译复用完成');

@@ -236,7 +236,12 @@ export class ReuseEngine {
       items: suggestions,
     };
 
-    // 写入建议文件
+    // 写入建议文件（仅当有建议时）
+    if (suggestions.length === 0) {
+      this.logger.info('\nℹ️  未找到可复用的翻译，跳过文件生成');
+      return data;
+    }
+
     if (!this.options.dryRun) {
       // 检查文件是否存在
       const fileExists = await this.fileExists(outputFilePath);
