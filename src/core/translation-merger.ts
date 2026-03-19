@@ -175,16 +175,24 @@ export class TranslationMerger {
             otherKeysToUpdate.set(otherFilePath, new Map());
           }
 
-          // 验证 baseValue 是否匹配（从基础语言文件读取）
-          const localBaseValue = await this.getLocalBaseValue(otherFilePath, otherKeyName);
-          if (localBaseValue !== undefined && localBaseValue === mapping.baseValue) {
+          // 获取关联键在本地基础语言文件中的值
+          // 传递目标语言代码，用于精确替换路径中的语言变量
+          const otherKeyBaseValue = await this.getLocalBaseValue(
+            otherFilePath,
+            otherKeyName,
+            localTargetFile.language
+          );
+
+          // 验证关联键的 baseValue 是否与主键的 baseValue 匹配
+          // 这是为了确保去重的准确性（相同中文才用相同翻译）
+          if (otherKeyBaseValue !== undefined && otherKeyBaseValue === mapping.baseValue) {
             otherKeysToUpdate.get(otherFilePath)!.set(otherKeyName, translatedValue);
             this.logger.verboseLog(
               `  📋 关联键: ${otherFilePath}:${otherKeyName} = "${translatedValue}"`
             );
           } else {
             this.logger.warn(
-              `  ⚠ 跳过关联键 ${otherFilePath}:${otherKeyName}（基础值不匹配或不存在）`
+              `  ⚠ 跳过关联键 ${otherFilePath}:${otherKeyName}（${otherKeyBaseValue === undefined ? '在本地基础语言文件中不存在' : `基础值不匹配: "${otherKeyBaseValue}" !== "${mapping.baseValue}"`}）`
             );
           }
         }
@@ -248,10 +256,13 @@ export class TranslationMerger {
 
   /**
    * 获取本地基础语言文件的值
-   * 首先尝试从目标语言文件路径读取，如果值存在但不为空则返回；
-   * 否则尝试从基础语言文件路径读取
+   * 将文件路径中的目标语言代码替换为基础语言代码，然后读取 key 的值
    */
-  private async getLocalBaseValue(filePath: string, key: string): Promise<string | undefined> {
+  private async getLocalBaseValue(
+    filePath: string,
+    key: string,
+    targetLanguage: string
+  ): Promise<string | undefined> {
     if (!this.scanner || !this.config || !this.basePath || !this.baseLanguage) {
       return undefined;
     }
@@ -260,39 +271,18 @@ export class TranslationMerger {
       // 规范化路径（处理 Windows 路径分隔符）
       const normalizedFilePath = normalizePath(filePath);
 
-      // 首先尝试直接读取文件（可能是目标语言文件）
-      let fullPath = path.join(this.basePath, normalizedFilePath);
-      let content = await this.yamlHandler.loadFile(fullPath);
+      // 使用目标语言代码精确替换（来自 localTargetFile.language）
+      // 替换路径中的 /{targetLanguage}/ 为 /{baseLanguage}/
+      const baseLanguageFilePath = normalizedFilePath.replace(
+        `/${targetLanguage}/`,
+        `/${this.baseLanguage}/`
+      );
 
-      // 如果键存在且值不为空，返回该值
-      if (key in content && content[key] && content[key].trim() !== '') {
-        return content[key];
-      }
+      // 读取基础语言文件
+      const fullPath = path.join(this.basePath, baseLanguageFilePath);
+      const content = await this.yamlHandler.loadFile(fullPath);
 
-      // 如果直接读取失败或值为空，尝试将语言代码替换为基础语言代码
-      // 例如：app/shop/locales/en-US/translations.yml -> app/shop/locales/zh-CN/translations.yml
-      const pathParts = normalizedFilePath.split('/');
-      for (let i = 0; i < pathParts.length; i++) {
-        const part = pathParts[i];
-        // 检查是否是语言代码（包含连字符的通常是语言代码，如 en-US, zh-CN）
-        if (part.includes('-') && i > 0) {
-          // 替换为基础语言代码
-          const newPathParts = [...pathParts];
-          newPathParts[i] = this.baseLanguage;
-          const newFilePath = newPathParts.join('/');
-
-          fullPath = path.join(this.basePath, newFilePath);
-          content = await this.yamlHandler.loadFile(fullPath);
-
-          if (key in content) {
-            return content[key];
-          }
-
-          break; // 只尝试第一次匹配的语言代码
-        }
-      }
-
-      return undefined;
+      return content[key];
     } catch (error) {
       return undefined;
     }
