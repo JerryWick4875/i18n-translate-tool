@@ -100,7 +100,7 @@ module.exports = {
   // 快照功能配置
   snapshot: {
     dir: 'i18n-translate-snapshot',
-    pathPattern: '{app}/{target}.yml',
+    pathPattern: '{app}/{locale}.yml',  // 语言变量必须使用 {locale}
   },
 
   // 翻译复用功能配置

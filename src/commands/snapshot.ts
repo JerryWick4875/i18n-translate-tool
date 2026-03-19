@@ -53,7 +53,7 @@ export const command = new Command('snapshot')
       }
 
       const snapshotDir = path.join(basePath, config.snapshot?.dir || 'i18n-translate-snapshot');
-      const pathPattern = config.snapshot?.pathPattern || '{app}/{target}.yml';
+      const pathPattern = config.snapshot?.pathPattern || '{app}/{locale}.yml';
       const snapshotManager = new SnapshotManager(snapshotDir, pathPattern);
 
       for (const [group, groupFiles] of groups) {

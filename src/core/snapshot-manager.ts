@@ -11,7 +11,7 @@ export class SnapshotManager {
   private snapshotDir: string;
   private pathPattern: string;
 
-  constructor(snapshotDir: string, pathPattern: string = '{app}/{target}.yml') {
+  constructor(snapshotDir: string, pathPattern: string = '{app}/{locale}.yml') {
     this.snapshotDir = snapshotDir;
     this.pathPattern = pathPattern;
   }
@@ -29,8 +29,7 @@ export class SnapshotManager {
   ): string {
     let relativePath = this.pathPattern;
 
-    relativePath = relativePath.replace(/{target}/g, targetLanguage);
-    relativePath = relativePath.replace(/{language}/g, targetLanguage);
+    relativePath = relativePath.replace(/{locale}/g, targetLanguage);
 
     if (!variables['app']) {
       relativePath = relativePath.replace(/{app}/g, app);

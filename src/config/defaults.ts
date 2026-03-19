@@ -21,7 +21,7 @@ export const DEFAULT_CONFIG: I18nConfig = {
   // 快照配置
   snapshot: {
     dir: 'i18n-translate-snapshot',
-    pathPattern: '{app}/{product}/{target}.yml',
+    pathPattern: '{app}/{product}/{locale}.yml',
   },
 
   // 翻译复用配置

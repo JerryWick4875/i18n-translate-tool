@@ -24,7 +24,7 @@ export async function run() {
         verbose: false,
         dryRun: false,
       },
-      '{app}/{target}.yml',
+      '{app}/{locale}.yml',
       logger
     );
 

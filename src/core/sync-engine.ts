@@ -19,7 +19,7 @@ export class SyncEngine {
   private diffEngine: DiffEngine;
   private snapshotPathPattern: string;
 
-  constructor(options: SyncOptions, snapshotPathPattern: string = '{app}/{target}.yml', logger?: Logger) {
+  constructor(options: SyncOptions, snapshotPathPattern: string = '{app}/{locale}.yml', logger?: Logger) {
     this.options = options;
     this.snapshotPathPattern = snapshotPathPattern;
     this.logger = logger || new Logger(options.verbose);

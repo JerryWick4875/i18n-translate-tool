@@ -128,8 +128,8 @@ Test numbering resets within each group (1, 2, 3...) not cumulative across group
 
 **Snapshot Path Pattern:**
 - Uses variables extracted from scan patterns (e.g., `{app}`, `{product}`)
-- `{target}` or `{language}` = target language code
-- Example: `'{app}/{product}/{target}.yml'` → `shop/widget/en-US.yml`
+- `{locale}` = language code (required variable name for language)
+- Example: `'{app}/{product}/{locale}.yml'` → `shop/widget/en-US.yml`
 
 **App Extraction:**
 - First named wildcard in pattern is treated as "app" for grouping

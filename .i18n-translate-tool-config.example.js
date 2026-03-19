@@ -16,7 +16,7 @@ module.exports = {
     // 'app/(* as app)/config/locales/(* as locale)/*.yml',
 
     // 示例：嵌套结构（语言代码后有子目录）
-    'app/(* as app)/config/locales/(* as locale)/*/*.yml',
+    'app/(* as app)/config/locales/(* as locale)/(* as product)/*.yml',
 
     // 示例：多变量（app + product + locale）
     // 'app/(* as app)/config/products/(* as product)/locales/(* as locale)/*.yml',
@@ -28,8 +28,9 @@ module.exports = {
     dir: 'i18n-translate-snapshot',
 
     // 快照文件路径模式
-    // 可用变量: {app}, {product}, {target}, {language} 等
-    pathPattern: '{app}/{product}/{target}.yml',
+    // 可用变量: {app}, {product}, {locale} 等
+    // 注意：语言变量必须使用 {locale}
+    pathPattern: '{app}/{product}/{locale}.yml',
   },
 
   // ==================== 翻译复用功能配置 ====================
@@ -40,49 +41,45 @@ module.exports = {
     // 忽略值列表（这些值会被视为"空值"并需要填充翻译）
     ignoreValues: [
       '(i18n-no-translate)',
-      '-',
-      'TODO',
-      'N/A',
-      '待翻译'
+      '(i18n-removed)',
     ],
   },
 
-  // ==================== 提交功能配置（可选）====================
-  // submission: {
-  //   // 提取文件输出目录（相对于项目根目录）
-  //   outputDir: 'i18n-translate-submission',
-  //
-  //   // 去重功能配置
-  //   deduplication: {
-  //     enabled: false,                    // 是否启用去重
-  //     mappingFileName: '_translation-mapping.yml', // 映射文件名
-  //   },
-  //
-  //   // GitLab 配置（用于 --apply 提交到 GitLab）
-  //   gitlab: {
-  //     url: 'https://gitlab.example.com', // GitLab 地址
-  //     projectId: 123,                    // 项目 ID
-  //     token: process.env.GITLAB_TOKEN || '', // 访问令牌
-  //     basePath: '',                      // 文件在仓库中的基础路径（可选）
-  //     baseBranch: 'main',                // 创建分支的基线分支（可选，默认 main）
-  //   },
-  //
-  //   // Xanadu 配置（用于提交到翻译平台）
-  //   xanadu: {
-  //     sourceLang: 'zh-CN',               // 源语言代码
-  //     targetLang: 'en-US',               // 目标语言代码
-  //     personnel: {                       // 人员配置（Docker ID）
-  //       prDockerId: 123,                 // PR 人员 ID
-  //       translationDockerId: 456,        // 翻译人员 ID
-  //       commitDockerId: 789,             // 提交人员 ID
-  //       managerId: 101,                  // 管理员 ID
-  //       feDockerId: 102,                 // 前端人员 ID
-  //     },
-  //     project: {                         // 项目配置
-  //       productId: 20,                   // 产品 ID（创建项目时使用）
-  //       level: 'normal',                 // 优先级: normal | high | low
-  //       versionType: 'oversea',          // 版本类型: oversea | domestic
-  //     },
-  //   },
-  // },
+  submission: {
+    // 提取文件输出目录（相对于项目根目录）
+    outputDir: 'i18n-translate-submission',
+  
+    // 去重功能配置
+    deduplication: {
+      enabled: true,                    // 是否启用去重
+      mappingFileName: '_translation-mapping.yml', // 映射文件名
+    },
+  
+    // GitLab 配置（用于 --apply 提交到 GitLab）
+    gitlab: {
+      url: 'https://gitlab.example.com', // GitLab 地址
+      projectId: 123,                    // 项目 ID
+      token: process.env.GITLAB_TOKEN || '', // 访问令牌
+      basePath: '',                      // 文件在仓库中的基础路径（可选）
+      baseBranch: 'main',                // 创建分支的基线分支（可选，默认 main）
+    },
+  
+    // Xanadu 配置（用于提交到翻译平台）
+    xanadu: {
+      sourceLang: 'zh-CN',               // 源语言代码
+      targetLang: 'en-US',               // 目标语言代码
+      personnel: {                       // 人员配置（Docker ID）
+        prDockerId: 0,                 // PR 人员 ID
+        translationDockerId: 0,        // 翻译人员 ID
+        commitDockerId: 0,             // 提交人员 ID
+        managerId: 0,                  // 管理员 ID
+        feDockerId: 0,                 // 前端人员 ID
+      },
+      project: {                         // 项目配置
+        productId: 0,                   // 产品 ID（创建项目时使用）
+        level: 'normal',                 // 优先级: normal | high | low
+        versionType: 'oversea',          // 版本类型: oversea | domestic
+      },
+    },
+  },
 };

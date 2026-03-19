@@ -32,7 +32,7 @@ export const command = new Command('sync')
           verbose: options.verbose,
           dryRun: options.dryRun,
         },
-        config.snapshot?.pathPattern || '{app}/{target}.yml',
+        config.snapshot?.pathPattern || '{app}/{locale}.yml',
         logger
       );
 
