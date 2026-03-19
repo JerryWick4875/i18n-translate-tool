@@ -6,6 +6,7 @@ import { GitLabClient } from '../core/gitlab-client';
 import { XanaduClient } from '../core/xanadu-client';
 import { loadConfig } from '../config/config-loader';
 import * as path from 'path';
+import * as fs from 'fs/promises';
 import { Logger } from '../utils/logger';
 import { I18nConfig } from '../types';
 
@@ -319,6 +320,10 @@ async function runSubmitGitlab(
 
   const commitCount = await gitlabClient.commitFiles(allFiles, branchName);
   logger.info(`提交文件数: ${commitCount}`);
+
+  // 提交成功后删除本地输出目录
+  await fs.rm(outputDir, { recursive: true, force: true });
+  logger.info(`已删除本地输出目录: ${outputDir}`);
 
   // 返回分支名称供 Xanadu 使用
   return branchName;
