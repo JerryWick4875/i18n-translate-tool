@@ -40,6 +40,9 @@ export class SnapshotManager {
       relativePath = relativePath.replace(new RegExp(`{${key}}`, 'g'), value);
     }
 
+    // 使用 __default__ 填充未替换的变量
+    relativePath = relativePath.replace(/\{[^}]+\}/g, '__default__');
+
     return path.join(this.snapshotDir, relativePath);
   }
 

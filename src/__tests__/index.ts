@@ -18,6 +18,7 @@ const TEST_GROUPS = {
     'case-5-multiple-files',
     'case-6-product-structure',
     'case-7-filter-directory',
+    'case-8-missing-variable',
   ],
   reuse: [
     'case-1-unique-match',
