@@ -115,4 +115,11 @@ export class Logger {
   static silent(): Logger {
     return new Logger(false, true);
   }
+
+  /**
+   * 检查是否为详细模式
+   */
+  isVerbose(): boolean {
+    return this.verbose;
+  }
 }

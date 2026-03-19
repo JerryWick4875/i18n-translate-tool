@@ -7,6 +7,7 @@ import * as reuseTranslations from './commands/reuse-translations';
 import * as submitGitlab from './commands/submit-gitlab';
 import * as pull from './commands/pull';
 import * as submitXanadu from './commands/submit-xanadu';
+import * as autoSubmit from './commands/auto-submit';
 
 program
   .name('i18n-translate-tool')
@@ -20,5 +21,6 @@ program.addCommand(reuseTranslations.command);
 program.addCommand(submitGitlab.command);
 program.addCommand(pull.command);
 program.addCommand(submitXanadu.command);
+program.addCommand(autoSubmit.command);
 
 program.parse();
