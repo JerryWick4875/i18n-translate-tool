@@ -100,15 +100,17 @@ export const command = new Command('reuse')
         // 生成模式：生成建议文件
         logger.section(`\n🔍 为 ${options.target} 生成复用建议...`);
 
-        await reuseEngine.generateSuggestions(
+        const suggestionsData = await reuseEngine.generateSuggestions(
           config.scanPatterns,
           config.baseLanguage,
           outputPath
         );
 
-        logger.info(`\n📝 建议已写入 ${outputPath}`);
-        logger.info('编辑文件以从多选中选择，然后运行:');
-        logger.info(`  i18n-tool reuse --apply`);
+        if (suggestionsData.items.length > 0) {
+          logger.info(`\n📝 建议已写入 ${outputPath}`);
+          logger.info('编辑文件以从多选中选择，然后运行:');
+          logger.info(`  i18n-tool reuse --apply`);
+        }
       }
 
       logger.success('\n✅ 翻译复用完成');
