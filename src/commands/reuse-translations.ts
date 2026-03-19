@@ -109,7 +109,7 @@ export const command = new Command('reuse')
         if (suggestionsData.items.length > 0) {
           logger.info(`\n📝 建议已写入 ${outputPath}`);
           logger.info('编辑文件以从多选中选择，然后运行:');
-          logger.info(`  i18n-tool reuse --apply`);
+          logger.info(`  i18n-translate-tool reuse --apply`);
         }
       }
 

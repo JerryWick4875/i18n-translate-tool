@@ -141,7 +141,7 @@ export class ReuseEngine {
     const targetLanguage = this.options.target;
     const outputFilePath = this.resolveOutputPath(outputPath || this.options.outputPath || '.i18ntool-reuse.yml');
 
-    this.logger.section(`\n🔍 Scanning for empty translations in ${targetLanguage}...`);
+    this.logger.section(`\n🔍 扫描 ${targetLanguage} 中的空翻译...`);
 
     // 扫描所有文件
     let allFiles = await this.scanner.scan(scanPatterns);
@@ -224,7 +224,7 @@ export class ReuseEngine {
       }
     }
 
-    this.logger.info(`Found ${emptyKeys.length} empty translations:`);
+    this.logger.info(`找到 ${emptyKeys.length} 个空翻译:`);
     this.logger.info(`  - ${uniqueMatches} with unique matches (auto-fill)`);
     this.logger.info(`  - ${multipleMatches} with multiple matches (user selection needed)`);
     this.logger.info(`  - ${noMatches} with no matches (skipped)`);
