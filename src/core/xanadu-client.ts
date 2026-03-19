@@ -124,7 +124,9 @@ export class XanaduClient {
     gitlabProjectId: number,
     projectName: string,
     productName: string,
-    transferTime: number
+    transferTime: number,
+    sourceLang: string,
+    targetLang: string
   ): Promise<number | null> {
     try {
       // 使用项目名称作为搜索关键词
@@ -135,6 +137,8 @@ export class XanaduClient {
           limit: 100,
           page: 1,
           search: projectName,
+          source_lang: sourceLang,
+          translation_lang: targetLang,
         }),
       });
 
@@ -223,7 +227,9 @@ export class XanaduClient {
         options.gitlabProjectId,
         options.projectName,
         productName,
-        now
+        now,
+        options.sourceLang,
+        options.targetLang
       );
       if (!projectId) {
         throw new Error('项目创建成功但无法获取项目 ID，请稍后重试');
