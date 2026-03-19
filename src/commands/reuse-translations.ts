@@ -111,6 +111,7 @@ export const command = new Command('reuse')
           logger.info('编辑文件以从多选中选择，然后运行:');
           logger.info(`  i18n-translate-tool reuse --apply`);
         }
+        return;
       }
 
       logger.success('\n✅ 翻译复用完成');
