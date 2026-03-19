@@ -139,6 +139,10 @@ export class XanaduClient {
           search: projectName,
           source_lang: sourceLang,
           translation_lang: targetLang,
+          field: 'all',
+          sort_by: 'DESC',
+          sort_type: 'created_time',
+          product_id: 'all',
         }),
       });
 
