@@ -17,7 +17,7 @@ export interface ProjectInfo {
   id: number;
   name: string;
   product_name: string;
-  gitlab_project_id?: string;
+  gitlab_project_id?: number;
   transfer_time: number;
 }
 
@@ -164,7 +164,7 @@ export class XanaduClient {
       const project = projects.find(
         (p) =>
           p.product_name === productName &&
-          p.gitlab_project_id === String(gitlabProjectId) &&
+          p.gitlab_project_id === gitlabProjectId &&
           p.transfer_time === transferTime
       );
 
