@@ -14,8 +14,16 @@ export class GitLabClient {
   constructor(config: GitLabConfig, logger: Logger) {
     this.config = config;
     this.logger = logger;
+    // 优先使用配置中的 token，否则使用环境变量
+    const token = config.token || process.env.GITLAB_TOKEN;
+    if (!token) {
+      throw new Error(
+        'GitLab token 未设置，请在配置文件中设置 submission.gitlab.token ' +
+        '或使用环境变量 GITLAB_TOKEN'
+      );
+    }
     this.gitlab = new Gitlab({
-      token: config.token,
+      token,
       host: config.url,
     });
   }
