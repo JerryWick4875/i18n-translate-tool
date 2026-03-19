@@ -1,0 +1,7 @@
+# 目标语言文件：主键和关联键都被填充为相同的翻译
+cart.title: "商品标题翻译"
+order.title: "商品标题翻译"
+product.title: "商品标题翻译"
+
+cart.empty: "Cart is empty"
+cart.checkout: "Checkout"

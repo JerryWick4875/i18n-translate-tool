@@ -1,0 +1,7 @@
+# 目标语言文件：主键和关联键都是空值
+cart.title: ""
+order.title: ""
+product.title: ""
+
+cart.empty: "Cart is empty"
+cart.checkout: "Checkout"

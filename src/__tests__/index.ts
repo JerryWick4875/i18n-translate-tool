@@ -35,6 +35,7 @@ const TEST_GROUPS = {
   pull: [
     'case-1-pull-basic',
     'case-2-pull-deduplication',
+    'case-3-pull-primary-key-empty',
   ],
 };
 

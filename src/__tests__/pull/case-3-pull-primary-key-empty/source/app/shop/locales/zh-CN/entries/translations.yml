@@ -1,0 +1,8 @@
+# 去重翻译测试
+# 三个键的基础语言值相同，应该使用相同的翻译
+cart.title: "商品标题"
+order.title: "商品标题"
+product.title: "商品标题"
+
+cart.empty: "购物车为空"
+cart.checkout: "去结算"

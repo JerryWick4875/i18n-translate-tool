@@ -51,29 +51,38 @@ export class TranslationMerger {
       this.logger.warn('🔒 DRY RUN 模式：不会实际修改文件');
     }
 
-    // 如果有映射文件，首先处理 otherKeys
+    // 收集所有需要写入的改动（主键 + 关联键）
+    const allChanges = new Map<string, Map<string, string>>(); // filePath -> (key -> value)
+
+    // 如果有映射文件，处理 otherKeys 并添加到改动集合
     if (mappingLookup && mappingLookup.size > 0) {
       this.logger.verboseLog(`\n📋 使用映射文件处理关联键...`);
-      await this.resolveOtherKeys(translationData, mappingLookup, force, dryRun);
+      await this.collectOtherKeys(translationData, mappingLookup, force, allChanges);
     }
 
     let filledCount = 0;
     let skippedCount = 0;
     let fileCount = 0;
 
+    // 处理主键并添加到改动集合
     for (const item of translationData) {
       const { localTargetFile, translations } = item;
 
       this.logger.verboseLog(`\n处理文件: ${localTargetFile.relativePath}`);
 
+      // 获取该文件的改动集合
+      const filePath = localTargetFile.relativePath;
+      if (!allChanges.has(filePath)) {
+        allChanges.set(filePath, new Map());
+      }
+      const fileChanges = allChanges.get(filePath)!;
+
       // 读取当前文件内容
       const currentContent = localTargetFile.content;
-      const newContent = { ...currentContent };
-
       let fileFilledCount = 0;
       let fileSkippedCount = 0;
 
-      // 应用每个翻译
+      // 应用每个翻译（主键）
       for (const [key, translatedValue] of translations.entries()) {
         const currentValue = currentContent[key];
 
@@ -86,8 +95,8 @@ export class TranslationMerger {
           continue;
         }
 
-        // 应用翻译
-        newContent[key] = translatedValue;
+        // 添加到改动集合
+        fileChanges.set(key, translatedValue);
         fileFilledCount++;
 
         if (dryRun || currentContent[key] !== translatedValue) {
@@ -95,23 +104,6 @@ export class TranslationMerger {
             `  ✓ key '${key}': "${currentContent[key]}" -> "${translatedValue}"`
           );
         }
-      }
-
-      // 写入文件（如果不是 dry run）
-      if (fileFilledCount > 0 && !dryRun) {
-        try {
-          await this.yamlHandler.writeFile(localTargetFile.path, newContent);
-          fileCount++;
-          this.logger.verboseLog(`  ✓ ${localTargetFile.relativePath}: 填充 ${fileFilledCount} 个词条`);
-        } catch (error) {
-          this.logger.error(`  ✗ ${localTargetFile.relativePath}: 写入失败`);
-          if (error instanceof Error) {
-            this.logger.verboseLog(`    错误: ${error.message}`);
-          }
-        }
-      } else if (fileFilledCount > 0) {
-        fileCount++;
-        this.logger.verboseLog(`  [DRY RUN] ${localTargetFile.relativePath}: 将填充 ${fileFilledCount} 个词条`);
       }
 
       if (fileSkippedCount > 0) {
@@ -122,10 +114,18 @@ export class TranslationMerger {
       skippedCount += fileSkippedCount;
     }
 
-    this.logger.success(`\n合并完成:`);
-    this.logger.verboseLog(`  填充词条: ${filledCount}`);
-    this.logger.verboseLog(`  跳过词条: ${skippedCount}`);
-    this.logger.verboseLog(`  修改文件: ${fileCount}`);
+    // 一次性写入所有改动
+    if (allChanges.size > 0) {
+      this.logger.verboseLog(`\n应用 ${allChanges.size} 个文件的改动...`);
+      await this.applyAllChanges(translationData, allChanges, dryRun);
+
+      // 统计文件数
+      for (const changes of allChanges.values()) {
+        if (changes.size > 0) {
+          fileCount++;
+        }
+      }
+    }
 
     return {
       filledCount,
@@ -135,24 +135,21 @@ export class TranslationMerger {
   }
 
   /**
-   * 解析并应用 otherKeys
+   * 收集 otherKeys 的改动（不直接写入）
    */
-  private async resolveOtherKeys(
+  private async collectOtherKeys(
     translationData: Array<{
       localTargetFile: LocaleFile;
       translations: Map<string, string>;
     }>,
     mappingLookup: Map<string, MappingEntry>,
     force: boolean,
-    dryRun: boolean
+    allChanges: Map<string, Map<string, string>>
   ): Promise<void> {
     if (!this.scanner || !this.config || !this.basePath) {
       this.logger.warn('无法解析 otherKeys：缺少 scanner 或 config');
       return;
     }
-
-    // 收集所有需要更新的 otherKeys
-    const otherKeysToUpdate = new Map<string, Map<string, string>>(); // filePath -> (key -> value)
 
     for (const item of translationData) {
       const { localTargetFile, translations } = item;
@@ -171,12 +168,28 @@ export class TranslationMerger {
           const otherFilePath = otherKey.file;
           const otherKeyName = otherKey.key;
 
-          if (!otherKeysToUpdate.has(otherFilePath)) {
-            otherKeysToUpdate.set(otherFilePath, new Map());
+          // 获取该文件的改动集合
+          if (!allChanges.has(otherFilePath)) {
+            allChanges.set(otherFilePath, new Map());
+          }
+          const fileChanges = allChanges.get(otherFilePath)!;
+
+          // 检查是否需要跳过（从本地文件读取当前值）
+          const localFile = await this.getLocalFile(otherFilePath);
+          if (!localFile) {
+            this.logger.warn(`  ⚠ 本地文件不存在: ${otherFilePath}`);
+            continue;
+          }
+
+          const currentValue = localFile.content[otherKeyName];
+          if (currentValue && currentValue.trim() !== '' && !force) {
+            this.logger.verboseLog(
+              `  ⚠ ${otherFilePath}:${otherKeyName}: 已存在翻译（使用 --force 覆盖）`
+            );
+            continue;
           }
 
           // 获取关联键在本地基础语言文件中的值
-          // 传递目标语言代码，用于精确替换路径中的语言变量
           const otherKeyBaseValue = await this.getLocalBaseValue(
             otherFilePath,
             otherKeyName,
@@ -184,9 +197,8 @@ export class TranslationMerger {
           );
 
           // 验证关联键的 baseValue 是否与主键的 baseValue 匹配
-          // 这是为了确保去重的准确性（相同中文才用相同翻译）
           if (otherKeyBaseValue !== undefined && otherKeyBaseValue === mapping.baseValue) {
-            otherKeysToUpdate.get(otherFilePath)!.set(otherKeyName, translatedValue);
+            fileChanges.set(otherKeyName, translatedValue);
             this.logger.verboseLog(
               `  📋 关联键: ${otherFilePath}:${otherKeyName} = "${translatedValue}"`
             );
@@ -198,59 +210,76 @@ export class TranslationMerger {
         }
       }
     }
+  }
 
-    // 应用 otherKeys 的翻译
-    if (otherKeysToUpdate.size > 0) {
-      this.logger.verboseLog(`\n应用 ${otherKeysToUpdate.size} 个文件的关联键翻译...`);
+  /**
+   * 应用所有改动到文件
+   */
+  private async applyAllChanges(
+    translationData: Array<{
+      localTargetFile: LocaleFile;
+      translations: Map<string, string>;
+    }>,
+    allChanges: Map<string, Map<string, string>>,
+    dryRun: boolean
+  ): Promise<void> {
+    if (!this.scanner || !this.config || !this.basePath) {
+      return;
+    }
 
-      // 扫描并加载所有本地文件
-      const allFiles = await this.scanner.scan(this.config!.scanPatterns);
-      const loadedFiles = await this.yamlHandler.loadFiles(allFiles);
+    // 扫描并加载所有本地文件
+    const allFiles = await this.scanner.scan(this.config.scanPatterns);
+    const loadedFiles = await this.yamlHandler.loadFiles(allFiles);
 
-      for (const [filePath, translations] of otherKeysToUpdate.entries()) {
-        // 查找对应的本地文件（需要规范化路径进行比较）
-        const localFile = loadedFiles.find(f => normalizePath(f.relativePath) === normalizePath(filePath));
+    for (const [filePath, changes] of allChanges.entries()) {
+      if (changes.size === 0) continue;
 
-        if (!localFile) {
-          this.logger.warn(`  ⚠ 本地文件不存在: ${filePath}`);
-          continue;
-        }
+      // 查找对应的本地文件（需要规范化路径进行比较）
+      const localFile = loadedFiles.find(f => normalizePath(f.relativePath) === normalizePath(filePath));
 
-        // 应用翻译
-        const currentContent = localFile.content;
-        const newContent = { ...currentContent };
-        let fileFilledCount = 0;
-
-        for (const [key, translatedValue] of translations.entries()) {
-          const currentValue = currentContent[key];
-
-          // 检查是否需要跳过（已有翻译且不使用 force）
-          if (currentValue && currentValue.trim() !== '' && !force) {
-            this.logger.verboseLog(
-              `  ⚠ ${filePath}:${key}: 已存在翻译（使用 --force 覆盖）`
-            );
-            continue;
-          }
-
-          newContent[key] = translatedValue;
-          fileFilledCount++;
-        }
-
-        // 写入文件
-        if (fileFilledCount > 0 && !dryRun) {
-          try {
-            await this.yamlHandler.writeFile(localFile.path, newContent);
-            this.logger.verboseLog(`  ✓ ${filePath}: 填充 ${fileFilledCount} 个关联键`);
-          } catch (error) {
-            this.logger.error(`  ✗ ${filePath}: 写入失败`);
-            if (error instanceof Error) {
-              this.logger.verboseLog(`    错误: ${error.message}`);
-            }
-          }
-        } else if (fileFilledCount > 0) {
-          this.logger.verboseLog(`  [DRY RUN] ${filePath}: 将填充 ${fileFilledCount} 个关联键`);
-        }
+      if (!localFile) {
+        this.logger.warn(`  ⚠ 本地文件不存在: ${filePath}`);
+        continue;
       }
+
+      // 应用改动
+      const newContent = { ...localFile.content };
+      for (const [key, value] of changes.entries()) {
+        newContent[key] = value;
+      }
+
+      // 写入文件
+      if (!dryRun) {
+        try {
+          await this.yamlHandler.writeFile(localFile.path, newContent);
+          this.logger.verboseLog(`  ✓ ${filePath}: 填充 ${changes.size} 个词条`);
+        } catch (error) {
+          this.logger.error(`  ✗ ${filePath}: 写入失败`);
+          if (error instanceof Error) {
+            this.logger.verboseLog(`    错误: ${error.message}`);
+          }
+        }
+      } else {
+        this.logger.verboseLog(`  [DRY RUN] ${filePath}: 将填充 ${changes.size} 个词条`);
+      }
+    }
+  }
+
+  /**
+   * 获取本地文件
+   */
+  private async getLocalFile(filePath: string): Promise<{ content: Record<string, string>; path: string } | undefined> {
+    if (!this.scanner || !this.config || !this.basePath) {
+      return undefined;
+    }
+
+    try {
+      const normalizedFilePath = normalizePath(filePath);
+      const fullPath = path.join(this.basePath, normalizedFilePath);
+      const content = await this.yamlHandler.loadFile(fullPath);
+      return { content, path: fullPath };
+    } catch (error) {
+      return undefined;
     }
   }
 
