@@ -148,6 +148,8 @@ export const command = new Command('submit-gitlab')
       if (!options.apply) {
         logger.section('\n✅ 提取完成');
         logger.info(`输出目录: ${outputDir}`);
+        logger.info('\n📝 检查并确认翻译内容后，运行:');
+        logger.info(`  i18n-translate-tool submit-gitlab --apply`);
         return;
       }
 
