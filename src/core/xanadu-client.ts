@@ -134,7 +134,7 @@ export class XanaduClient {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({
-          limit: 100,
+          limit: 10,
           page: 1,
           search: projectName,
           source_lang: sourceLang,
