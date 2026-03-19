@@ -102,6 +102,14 @@ export class GitLabFetcher {
         this.logger.error(`读取文件失败: ${filePath}`);
         if (error instanceof Error) {
           this.logger.verboseLog(`  错误: ${error.message}`);
+          // 打印更多错误详情
+          const err = error as any;
+          if (err.cause) {
+            this.logger.verboseLog(`  原因: ${JSON.stringify(err.cause)}`);
+          }
+          if (err.response) {
+            this.logger.verboseLog(`  HTTP 状态: ${err.response.status}`);
+          }
         }
       }
     }
@@ -163,9 +171,22 @@ export class GitLabFetcher {
         branch
       );
 
-      // 解码 base64 内容（需要两次解码）
+      // 解码 base64 内容（GitLab API 返回 base64 编码的内容）
       let content = Buffer.from(file.content, 'base64').toString('utf-8');
-      content = Buffer.from(content, 'base64').toString('utf-8');
+
+      // 检查是否是双重编码（某些 GitLab 版本会这样）
+      // 如果解码后的内容仍然是 base64 格式，则再次解码
+      if (/^[A-Za-z0-9+/=\s]{40,}$/.test(content.trim())) {
+        try {
+          const decodedAgain = Buffer.from(content, 'base64').toString('utf-8');
+          // 如果第二次解码产生了可读的 YAML 内容，则使用它
+          if (decodedAgain.includes(':') || decodedAgain.includes('\n')) {
+            content = decodedAgain;
+          }
+        } catch {
+          // 第二次解码失败，使用第一次解码的结果
+        }
+      }
 
       // 解析 YAML
       const parsed = yaml.load(content) as Record<string, string> | undefined;
