@@ -19,6 +19,7 @@ const TEST_GROUPS = {
     'case-6-product-structure',
     'case-7-filter-directory',
     'case-8-missing-variable',
+    'case-9-auto-create-target-file',
   ],
   reuse: [
     'case-1-unique-match',

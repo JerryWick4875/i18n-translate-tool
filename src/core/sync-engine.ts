@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as fs from 'fs/promises';
 import { LocaleFile, SyncOptions, SyncResult, SnapshotData } from '../types';
 import { LocaleScanner } from './scanner';
 import { YamlHandler } from './yaml-handler';
@@ -129,15 +130,46 @@ export class SyncEngine {
 
         hasAnyChanges = true;
 
-        const targetFile = targetFiles.find(
+        let targetFile = targetFiles.find(
           f => f.relativePath === baseFile.relativePath.replace(baseLanguage, this.options.target)
         );
 
+        // 目标文件不存在时，自动创建
         if (!targetFile) {
-          this.logger.warn(`No target file found for ${baseFile.relativePath}`);
-          continue;
+          const targetRelativePath = baseFile.relativePath.replace(baseLanguage, this.options.target);
+          const targetPath = path.join(this.options.basePath, targetRelativePath);
+
+          if (this.options.dryRun) {
+            this.logger.dryRun(`Would create target file ${targetRelativePath}`);
+            continue;
+          }
+
+          // 确保目录存在
+          const targetDir = path.dirname(targetPath);
+          await fs.mkdir(targetDir, { recursive: true });
+
+          // 用基础语言的 key 初始化目标文件（值都为空字符串）
+          const initialContent: Record<string, string> = {};
+          const keyOrder = Object.keys(baseFile.content);
+          for (const key of keyOrder) {
+            initialContent[key] = '';
+          }
+          await this.yamlHandler.writeFile(targetPath, initialContent, keyOrder);
+
+          // 创建 LocaleFile 对象供后续使用
+          targetFile = {
+            path: targetPath,
+            relativePath: targetRelativePath,
+            language: this.options.target,
+            app: baseFile.app,
+            variables: baseFile.variables,
+            content: initialContent,
+          };
+
+          this.logger.success(`Created new target file: ${targetRelativePath} (${keyOrder.length} keys)`);
         }
 
+        // targetFile 此时必定存在
         await this.applyChanges(targetFile, fileChanges, baseFile.variables || {});
 
         result.fileCount++;
