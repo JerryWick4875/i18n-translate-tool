@@ -7,7 +7,7 @@ import * as path from 'path';
 export const command = new Command('sync')
   .description('同步翻译更改到目标语言')
   .option('--target <language>', '目标语言代码 (例如: en-US)')
-  .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
+  .option('--filter <paths...>', '过滤到特定目录（可多个，例如: app/shop 或 app/shop app/admin）')
   .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
   .option('--dry-run', '显示更改但不写入文件', false)

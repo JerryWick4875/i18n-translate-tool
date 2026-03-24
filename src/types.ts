@@ -62,7 +62,7 @@ export interface DiffResult {
 export interface SyncOptions {
   target: string;
   basePath: string;
-  filter?: string;
+  filter?: string | string[];
   verbose?: boolean;
   force?: boolean;
   dryRun?: boolean;
@@ -119,7 +119,7 @@ export interface ReuseTranslationOptions {
   target: string;
   basePath: string;
   baseLanguage?: string;
-  filter?: string;
+  filter?: string | string[];
   outputPath?: string;
   inputPath?: string;
   apply?: boolean;
@@ -181,7 +181,7 @@ export interface DedupedEntry {
 export interface SubmissionOptions {
   target: string;
   basePath: string;
-  filter?: string;
+  filter?: string | string[];
   force?: boolean;
   apply?: boolean;
   verbose?: boolean;
@@ -276,7 +276,7 @@ export interface PullOptions {
   branch: string;
   target: string;
   basePath: string;
-  filter?: string;
+  filter?: string | string[];
   dryRun?: boolean;
   force?: boolean;
   verbose?: boolean;

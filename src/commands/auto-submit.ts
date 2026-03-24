@@ -15,7 +15,7 @@ import { I18nConfig } from '../types';
  */
 interface AutoSubmitOptions {
   target?: string;
-  filter?: string;
+  filter?: string | string[];
   config?: string;
   verbose?: boolean;
   xanaduProjectId?: string;
@@ -26,7 +26,7 @@ interface AutoSubmitOptions {
 export const command = new Command('auto-submit')
   .description('自动执行完整流程：同步 -> 复用 -> 提交 GitLab -> 提交 Xanadu')
   .option('--target <language>', '目标语言代码（默认使用配置文件中的 defaultTarget）')
-  .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
+  .option('--filter <paths...>', '过滤到特定目录（可多个，例如: app/shop 或 app/shop app/admin）')
   .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
   .option('--xanadu-project-id <id>', '使用已有 Xanadu 项目')
@@ -174,7 +174,7 @@ async function runSync(
   config: I18nConfig,
   basePath: string,
   target: string,
-  filter: string | undefined,
+  filter: string | string[] | undefined,
   logger: Logger
 ): Promise<void> {
   const syncEngine = new SyncEngine(
@@ -209,7 +209,7 @@ async function runReuse(
   config: I18nConfig,
   basePath: string,
   target: string,
-  filter: string | undefined,
+  filter: string | string[] | undefined,
   logger: Logger
 ): Promise<{ filledCount: number; multipleMatchesCount: number }> {
   const reuseEngine = new ReuseEngine(
@@ -245,7 +245,7 @@ async function runSubmitGitlab(
   config: I18nConfig,
   basePath: string,
   target: string,
-  filter: string | undefined,
+  filter: string | string[] | undefined,
   logger: Logger
 ): Promise<string> {
   const gitlabConfig = config.submission!.gitlab!;

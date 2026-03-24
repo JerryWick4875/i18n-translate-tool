@@ -147,13 +147,17 @@ export class ReuseEngine {
     let allFiles = await this.scanner.scan(scanPatterns);
 
     if (this.options.filter) {
-      const normalizedFilter = path.normalize(this.options.filter);
+      // 支持多个 filter
+      const filters = Array.isArray(this.options.filter)
+        ? this.options.filter
+        : [this.options.filter];
+
       allFiles = allFiles.filter(f => {
         const relativeDir = path.dirname(f.relativePath);
-        return relativeDir.startsWith(normalizedFilter);
+        return filters.some(filter => relativeDir.startsWith(path.normalize(filter)));
       });
       if (allFiles.length === 0) {
-        this.logger.warn(`No files found matching filter: ${this.options.filter}`);
+        this.logger.warn(`No files found matching filters: ${filters.join(', ')}`);
         return {
           generatedAt: new Date().toISOString(),
           locale: targetLanguage,

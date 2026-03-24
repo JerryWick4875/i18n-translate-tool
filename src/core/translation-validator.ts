@@ -23,12 +23,12 @@ export class TranslationValidator {
   private logger: Logger;
   private config: I18nConfig;
   private basePath: string;
-  private filter?: string;
+  private filter?: string | string[];
 
   constructor(
     config: I18nConfig,
     basePath: string,
-    filter: string | undefined,
+    filter: string | string[] | undefined,
     logger: Logger
   ) {
     this.config = config;
@@ -248,10 +248,14 @@ export class TranslationValidator {
 
     // 应用过滤器
     if (this.filter) {
-      const normalizedFilter = path.normalize(this.filter);
+      // 支持多个 filter
+      const filters = Array.isArray(this.filter)
+        ? this.filter
+        : [this.filter];
+
       return loadedFiles.filter(f => {
         const relativeDir = path.dirname(f.relativePath);
-        return relativeDir.startsWith(normalizedFilter);
+        return filters.some(filter => relativeDir.startsWith(path.normalize(filter)));
       });
     }
 

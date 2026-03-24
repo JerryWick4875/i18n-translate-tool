@@ -7,7 +7,7 @@ import * as path from 'path';
 export const command = new Command('reuse')
   .description('复用现有翻译填充空翻译')
   .option('--target <language>', '目标语言代码 (例如: en-US)')
-  .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
+  .option('--filter <paths...>', '过滤到特定目录（可多个，例如: app/shop 或 app/shop app/admin）')
   .option('--output <path>', '建议文件输出路径')
   .option('--input <path>', '建议文件输入路径')
   .option('--force', '强制覆盖已存在的建议文件')

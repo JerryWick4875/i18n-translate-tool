@@ -10,7 +10,7 @@ import * as path from 'path';
 export const command = new Command('snapshot')
   .description('创建基础语言的快照用于目标语言')
   .option('--target <language>', '目标语言代码 (例如: en-US)')
-  .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
+  .option('--filter <paths...>', '过滤到特定目录（可多个，例如: app/shop 或 app/shop app/admin）')
   .option('--config <path>', '配置文件路径', '.i18n-translate-tool-config.js')
   .option('--verbose', '启用详细输出', false)
   .option('--dry-run', '显示更改但不写入文件', false)
@@ -29,13 +29,17 @@ export const command = new Command('snapshot')
       let files = await scanner.scan(config.scanPatterns);
 
       if (options.filter) {
-        const normalizedFilter = path.normalize(options.filter);
+        // 支持多个 filter
+        const filters = Array.isArray(options.filter)
+          ? options.filter
+          : [options.filter];
+
         files = files.filter(f => {
           const relativeDir = path.dirname(f.relativePath);
-          return relativeDir.startsWith(normalizedFilter);
+          return filters.some((filter: string) => relativeDir.startsWith(path.normalize(filter)));
         });
         if (files.length === 0) {
-          logger.warn(`未找到匹配过滤条件的文件: ${options.filter}`);
+          logger.warn(`未找到匹配过滤条件的文件: ${filters.join(', ')}`);
           return;
         }
       }

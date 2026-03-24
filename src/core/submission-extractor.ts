@@ -21,7 +21,7 @@ interface ExtractionConfig {
   baseLanguage: string;
   targetLanguage: string;
   outputDir: string;
-  filter?: string;
+  filter?: string | string[];
   outputFormat?: {
     quotingType?: string;
     forceQuotes?: boolean;
@@ -37,7 +37,7 @@ export class SubmissionExtractor {
   private yamlHandler: YamlHandler;
   private logger: Logger;
   private config: I18nConfig;
-  private filter?: string;
+  private filter?: string | string[];
   private deduplication?: boolean;
 
   constructor(options: SubmissionOptions, config: I18nConfig, logger: Logger) {
@@ -210,15 +210,16 @@ export class SubmissionExtractor {
   /**
    * 过滤文件
    */
-  private filterFiles(files: LocaleFile[], filter?: string): LocaleFile[] {
+  private filterFiles(files: LocaleFile[], filter?: string | string[]): LocaleFile[] {
     if (!filter) {
       return files;
     }
 
-    const normalizedFilter = path.normalize(filter);
+    // 支持多个 filter
+    const filters = Array.isArray(filter) ? filter : [filter];
     return files.filter(f => {
       const relativeDir = path.dirname(f.relativePath);
-      return relativeDir.startsWith(normalizedFilter);
+      return filters.some((filterValue: string) => relativeDir.startsWith(path.normalize(filterValue)));
     });
   }
 

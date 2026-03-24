@@ -10,7 +10,7 @@ import * as fs from 'fs/promises';
 export const command = new Command('submit-gitlab')
   .description('提取待翻译词条并提交到 GitLab')
   .option('--target <language>', '目标语言代码 (例如: en-US)')
-  .option('--filter <path>', '过滤到特定目录 (例如: app/shop)')
+  .option('--filter <paths...>', '过滤到特定目录（可多个，例如: app/shop 或 app/shop app/admin）')
   .option('--force', '强制覆盖已存在的输出目录')
   .option('--apply', '提取后提交到 GitLab')
   .option('--dedup', '启用去重功能（相同文案只提交一次）')
