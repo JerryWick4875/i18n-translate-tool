@@ -12,7 +12,6 @@ export async function run() {
 
   const testDir = __dirname;
   const sourceDir = path.join(testDir, 'source');
-  const expectedDir = path.join(testDir, 'expected');
 
   const tempDir = await copyToTemp(sourceDir);
 
@@ -23,77 +22,85 @@ export async function run() {
     const snapshotDir = path.join(tempDir, 'i18n-translate-snapshot');
     const snapshotManager = new SnapshotManager(snapshotDir, config.snapshot?.pathPattern || '{app}/{locale}.yml');
 
-    // 步骤 1: 创建初始快照（包含 shop 和 widget）
-    console.log('  步骤 1: 创建初始快照...');
-    let files = await scanner.scan(config.scanPatterns);
-    let loadedFiles = await yamlHandler.loadFiles(files);
+    // 验证初始快照存在（从 source 目录复制过来的）
+    console.log('  验证初始快照...');
 
-    // shop 快照
+    const shopInitialSnapshot = await snapshotManager.readSnapshot('shop', 'en-US');
+    if (!shopInitialSnapshot) {
+      throw new Error('初始 shop 快照不存在');
+    }
+    console.log('  ✓ shop 初始快照存在');
+
+    const widgetInitialSnapshot = await snapshotManager.readSnapshot('widget', 'en-US');
+    if (!widgetInitialSnapshot) {
+      throw new Error('初始 widget 快照不存在');
+    }
+    console.log('  ✓ widget 初始快照存在');
+
+    // 记录 widget 初始快照的标题（用于后续验证）
+    const widgetInitialTitle = widgetInitialSnapshot['app/widget/locales/zh-CN.yml']?.widgetTitle;
+
+    // 使用 filter 只更新 shop
+    console.log('  使用 filter app/shop/**/*.yml 更新快照...');
+
+    const files = await scanner.scan(config.scanPatterns);
+    const filteredFiles = await filterFilesByGlob(files, ['app/shop/**/*.yml'], tempDir);
+    const loadedFiles = await yamlHandler.loadFiles(filteredFiles);
+
     const shopBaseFiles = scanner.getFilesForAppAndLanguage(loadedFiles, 'shop', config.baseLanguage);
     const shopBaseData = new Map<string, Record<string, string>>();
     for (const file of shopBaseFiles) {
       shopBaseData.set(file.relativePath, file.content);
     }
-    await snapshotManager.createSnapshot('shop', 'en-US', shopBaseData);
-
-    // widget 快照
-    const widgetBaseFiles = scanner.getFilesForAppAndLanguage(loadedFiles, 'widget', config.baseLanguage);
-    const widgetBaseData = new Map<string, Record<string, string>>();
-    for (const file of widgetBaseFiles) {
-      widgetBaseData.set(file.relativePath, file.content);
-    }
-    await snapshotManager.createSnapshot('widget', 'en-US', widgetBaseData);
-
-    console.log('  初始快照已创建');
-
-    // 步骤 2: 使用 filter 只更新 shop（修改 shop 的内容）
-    console.log('  步骤 2: 使用 filter 更新 shop...');
-
-    // 修改 shop 的源文件，模拟内容变化
-    const fs = await import('fs/promises');
-    const shopZhPath = path.join(tempDir, 'app/shop/locales/zh-CN.yml');
-    await fs.writeFile(shopZhPath, 'shopTitle: "商品标题更新"\nshopDesc: "商品描述"\nshopNew: "新增字段"\n');
-
-    // 使用 filter 只处理 shop
-    files = await scanner.scan(config.scanPatterns);
-    files = await filterFilesByGlob(files, ['app/shop/**/*.yml'], tempDir);
-    loadedFiles = await yamlHandler.loadFiles(files);
-
-    const shopUpdatedBaseFiles = scanner.getFilesForAppAndLanguage(loadedFiles, 'shop', config.baseLanguage);
-    const shopUpdatedBaseData = new Map<string, Record<string, string>>();
-    for (const file of shopUpdatedBaseFiles) {
-      shopUpdatedBaseData.set(file.relativePath, file.content);
-    }
 
     // 使用 mergeSnapshot 更新 shop（不会影响 widget）
-    await snapshotManager.mergeSnapshot('shop', 'en-US', shopUpdatedBaseData);
+    await snapshotManager.mergeSnapshot('shop', 'en-US', shopBaseData);
+    console.log('  ✓ shop 快照已合并更新');
 
-    console.log('  shop 快照已合并更新');
+    // 验证结果
+    console.log('  验证结果...');
 
-    // 步骤 3: 验证结果
-    console.log('  步骤 3: 验证结果...');
-
-    // 验证 shop 快照是新数据
-    const shopSnapshot = await snapshotManager.readSnapshot('shop', 'en-US');
-    if (!shopSnapshot) {
-      throw new Error('shop 快照不存在');
-    }
-    const shopSnapshotContent = shopSnapshot['app/shop/locales/zh-CN.yml'];
-    if (!shopSnapshotContent || shopSnapshotContent.shopTitle !== '商品标题更新' || !shopSnapshotContent.shopNew) {
-      throw new Error('shop 快照未正确更新');
+    // 验证 shop 快照已更新（包含新数据）
+    const shopUpdatedSnapshot = await snapshotManager.readSnapshot('shop', 'en-US');
+    if (!shopUpdatedSnapshot) {
+      throw new Error('更新后 shop 快照不存在');
     }
 
-    // 验证 widget 快照仍然存在（未被删除）
+    const shopSnapshotContent = shopUpdatedSnapshot['app/shop/locales/zh-CN.yml'];
+    if (!shopSnapshotContent) {
+      throw new Error('shop 快照内容为空');
+    }
+
+    // 验证新字段存在
+    if (shopSnapshotContent.shopTitle !== '商品标题更新') {
+      throw new Error(`shop 快照未更新，期望 shopTitle="商品标题更新"，实际="${shopSnapshotContent.shopTitle}"`);
+    }
+
+    if (!shopSnapshotContent.shopNew) {
+      throw new Error('shop 快照缺少新字段 shopNew');
+    }
+
+    console.log('  ✓ shop 快照已更新为最新内容');
+
+    // 验证 widget 快照仍然存在且保持原有内容
     const widgetSnapshot = await snapshotManager.readSnapshot('widget', 'en-US');
     if (!widgetSnapshot) {
       throw new Error('widget 快照被意外删除（应该保留）');
     }
+
     const widgetSnapshotContent = widgetSnapshot['app/widget/locales/zh-CN.yml'];
-    if (!widgetSnapshotContent || widgetSnapshotContent.widgetTitle !== '组件标题') {
-      throw new Error('widget 快照数据不正确（应该保留原始数据）');
+    if (!widgetSnapshotContent) {
+      throw new Error('widget 快照内容为空');
     }
 
-    console.log(`✅ ${testName} passed`);
+    // 验证 widget 内容与初始快照一致
+    if (widgetSnapshotContent.widgetTitle !== widgetInitialTitle) {
+      throw new Error(`widget 快照内容被修改，期望 widgetTitle="${widgetInitialTitle}"，实际="${widgetSnapshotContent.widgetTitle}"`);
+    }
+
+    console.log('  ✓ widget 快照保持原有内容（未被影响）');
+
+    console.log(`\n✅ ${testName} passed`);
   } finally {
     await cleanupTemp(tempDir);
   }

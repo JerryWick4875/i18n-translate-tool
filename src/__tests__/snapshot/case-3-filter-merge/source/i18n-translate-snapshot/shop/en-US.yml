@@ -1,0 +1,4 @@
+app/shop/locales/zh-CN.yml:
+  shopTitle: 商品标题
+  shopDesc: 商品描述
+  shopPrice: 商品价格
