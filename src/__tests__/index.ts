@@ -40,6 +40,8 @@ const TEST_GROUPS = {
   ],
   'export-scattered': [
     'case-1-export-basic',
+    'case-2-locale-in-directory',
+    'case-3-root-locale-file',
   ],
   'import-scattered': [
     'case-1-import-basic',

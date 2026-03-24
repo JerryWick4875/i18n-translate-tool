@@ -1,0 +1,12 @@
+===== Keys =====
+zh-CN.yml:key2
+zh-CN.yml:key3
+===== Keys =====
+
+===== zh-CN =====
+值2
+值3
+===== zh-CN =====
+
+===== en-US =====
+===== en-US =====
