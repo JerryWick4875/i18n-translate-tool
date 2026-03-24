@@ -96,10 +96,15 @@ export class SnapshotManager {
       snapshotData = yaml.load(existingContent) as SnapshotData || {};
     }
 
-    // 合并新数据
+    // 合并新数据（key 级别）
     for (const [filePath, content] of baseLanguageData) {
       // 规范化路径为正斜杠（跨平台兼容）
-      snapshotData[normalizePath(filePath)] = { ...content };
+      const normalizedPath = normalizePath(filePath);
+      // key 级别合并：保留旧 key，添加/覆盖新 key
+      snapshotData[normalizedPath] = {
+        ...(snapshotData[normalizedPath] || {}),
+        ...content,
+      };
     }
 
     const yamlContent = yaml.dump(snapshotData, {
