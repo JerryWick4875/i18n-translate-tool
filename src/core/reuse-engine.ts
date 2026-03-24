@@ -132,11 +132,13 @@ export class ReuseEngine {
 
   /**
    * 生成翻译复用建议
+   * @param skipFileWrite 跳过写入建议文件（用于一键模式）
    */
   async generateSuggestions(
     scanPatterns: string[],
     baseLanguage: string,
-    outputPath?: string
+    outputPath?: string,
+    skipFileWrite = false
   ): Promise<ReuseSuggestionsData> {
     const targetLanguage = this.options.target;
     const outputFilePath = this.resolveOutputPath(outputPath || this.options.outputPath || '.i18ntool-reuse.yml');
@@ -243,6 +245,12 @@ export class ReuseEngine {
     // 写入建议文件（仅当有建议时）
     if (suggestions.length === 0) {
       this.logger.info('\nℹ️  未找到可复用的翻译，跳过文件生成');
+      return data;
+    }
+
+    // 跳过文件写入（用于一键模式）
+    if (skipFileWrite) {
+      this.logger.verboseLog('\nℹ️  跳过建议文件生成（一键模式）');
       return data;
     }
 
@@ -427,7 +435,9 @@ export class ReuseEngine {
     // 生成建议（内存中，不写入文件）
     const suggestions = await this.generateSuggestions(
       scanPatterns,
-      baseLanguage
+      baseLanguage,
+      undefined,  // outputPath
+      true        // skipFileWrite
     );
 
     // 过滤出有唯一匹配的建议
