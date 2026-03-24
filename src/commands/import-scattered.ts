@@ -7,7 +7,7 @@ import * as fs from 'fs';
 export const command = program
   .command('import-scattered')
   .description('导入零散翻译文件：读取翻译后的文件，将目标语言内容填回对应的 key')
-  .requiredOption('-i, --input <path>', '输入文件路径')
+  .option('-i, --input <path>', '输入文件路径', '.scattered-translations.txt')
   .option('-t, --target <lang>', '目标语言代码')
   .option('--dry-run', '预览模式，不实际修改文件')
   .option('-c, --config <path>', '配置文件路径')
