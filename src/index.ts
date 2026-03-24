@@ -8,6 +8,7 @@ import * as submitGitlab from './commands/submit-gitlab';
 import * as pull from './commands/pull';
 import * as submitXanadu from './commands/submit-xanadu';
 import * as autoSubmit from './commands/auto-submit';
+import * as autoExportScattered from './commands/auto-export-scattered';
 import * as exportScattered from './commands/export-scattered';
 import * as importScattered from './commands/import-scattered';
 
@@ -24,6 +25,7 @@ program.addCommand(submitGitlab.command);
 program.addCommand(pull.command);
 program.addCommand(submitXanadu.command);
 program.addCommand(autoSubmit.command);
+program.addCommand(autoExportScattered.command);
 program.addCommand(exportScattered.command);
 program.addCommand(importScattered.command);
 
