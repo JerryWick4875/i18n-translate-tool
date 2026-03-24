@@ -1,0 +1,17 @@
+===== Keys =====
+app/shop/locales/zh-CN.yml:description
+app/shop/locales/zh-CN.yml:price
+app/shop/locales/zh-CN.yml:title
+===== Keys =====
+
+===== zh-CN =====
+价格
+商品描述
+商品标题
+===== zh-CN =====
+
+===== en-US =====
+Price
+Product Description
+Product Title
+===== en-US =====

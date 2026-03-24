@@ -38,6 +38,12 @@ const TEST_GROUPS = {
     'case-2-pull-deduplication',
     'case-3-pull-primary-key-empty',
   ],
+  'export-scattered': [
+    'case-1-export-basic',
+  ],
+  'import-scattered': [
+    'case-1-import-basic',
+  ],
 };
 
 export async function runAllTests() {
