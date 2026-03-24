@@ -10,6 +10,7 @@ const TEST_GROUPS = {
   snapshot: [
     'case-1-snapshot-basic',
     'case-2-filter',
+    'case-3-filter-merge',
   ],
   sync: [
     'case-1-sync-new-keys',
