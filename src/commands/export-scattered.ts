@@ -27,30 +27,14 @@ export const command = program
         process.exit(1);
       }
 
-      // 应用过滤
-      let scanPatterns = config.scanPatterns;
-      if (options.filter && options.filter.length > 0) {
-        // 支持多个 filter，每个 filter 都应用到所有 scanPattern 上
-        const filteredPatterns: string[] = [];
-        for (const filter of options.filter) {
-          for (const pattern of scanPatterns) {
-            // 将第一个命名通配符替换为 filter
-            // 例如: app/(* as app)/locales/*.yml + shop -> app/shop/locales/*.yml
-            // 例如: (* as dir)/locales/*.yml + shop -> shop/locales/*.yml
-            const filtered = pattern.replace(/\(\*\s+as\s+[^)]+\)/, filter);
-            filteredPatterns.push(filtered);
-          }
-        }
-        scanPatterns = filteredPatterns;
-      }
-
       // 创建导出器并执行
       const exporter = new ScatteredExporter(logger, cwd);
       const result = await exporter.export({
-        scanPatterns,
+        scanPatterns: config.scanPatterns,
         baseLanguage: config.baseLanguage,
         targetLanguage,
         outputPath: options.output || config.scattered?.outputFile,
+        filterPatterns: options.filter,
       });
 
       logger.info(`\n✅ 导出完成:`);

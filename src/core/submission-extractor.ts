@@ -4,6 +4,7 @@ import { LocaleScanner } from './scanner';
 import { YamlHandler } from './yaml-handler';
 import { Logger } from '../utils/logger';
 import { ensureDir, normalizePath } from '../utils/file-utils';
+import { filterFilesByGlob } from '../utils/filter-utils';
 import {
   I18nConfig,
   SubmissionOptions,
@@ -37,12 +38,14 @@ export class SubmissionExtractor {
   private yamlHandler: YamlHandler;
   private logger: Logger;
   private config: I18nConfig;
+  private basePath: string;
   private filter?: string | string[];
   private deduplication?: boolean;
 
   constructor(options: SubmissionOptions, config: I18nConfig, logger: Logger) {
     this.config = config;
     this.logger = logger;
+    this.basePath = options.basePath;
     this.filter = options.filter;
     this.deduplication = options.deduplication;
     this.scanner = new LocaleScanner(options.basePath, config.scanPatterns);
@@ -65,7 +68,7 @@ export class SubmissionExtractor {
     this.logger.verboseLog(`扫描到 ${files.length} 个文件`);
 
     // 过滤文件（如果指定了过滤器）
-    const filteredFiles = this.filterFiles(files, this.filter);
+    const filteredFiles = await this.filterFiles(files, this.filter);
     this.logger.verboseLog(`过滤后 ${filteredFiles.length} 个文件`);
 
     // 加载文件内容
@@ -210,17 +213,13 @@ export class SubmissionExtractor {
   /**
    * 过滤文件
    */
-  private filterFiles(files: LocaleFile[], filter?: string | string[]): LocaleFile[] {
+  private async filterFiles(files: LocaleFile[], filter?: string | string[]): Promise<LocaleFile[]> {
     if (!filter) {
       return files;
     }
 
-    // 支持多个 filter
     const filters = Array.isArray(filter) ? filter : [filter];
-    return files.filter(f => {
-      const relativeDir = path.dirname(f.relativePath);
-      return filters.some((filterValue: string) => relativeDir.startsWith(path.normalize(filterValue)));
-    });
+    return filterFilesByGlob(files, filters, this.basePath);
   }
 
   /**

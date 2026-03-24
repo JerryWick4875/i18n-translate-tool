@@ -190,28 +190,14 @@ async function runExportScattered(
   outputPath: string | undefined,
   logger: Logger
 ): Promise<{ filePath: string; totalCount: number; uniqueCount: number }> {
-  // 应用过滤
-  let scanPatterns = config.scanPatterns;
-  if (filter && filter.length > 0) {
-    // 支持多个 filter，每个 filter 都应用到所有 scanPattern 上
-    const filteredPatterns: string[] = [];
-    for (const f of Array.isArray(filter) ? filter : [filter]) {
-      for (const pattern of scanPatterns) {
-        // 将第一个命名通配符替换为 filter
-        const filtered = pattern.replace(/\(\*\s+as\s+[^)]+\)/, f);
-        filteredPatterns.push(filtered);
-      }
-    }
-    scanPatterns = filteredPatterns;
-  }
-
   // 创建导出器并执行
   const exporter = new ScatteredExporter(logger, basePath);
   const result = await exporter.export({
-    scanPatterns,
+    scanPatterns: config.scanPatterns,
     baseLanguage: config.baseLanguage,
     targetLanguage: target,
     outputPath: outputPath || config.scattered?.outputFile || '.scattered-translations.txt',
+    filterPatterns: filter ? (Array.isArray(filter) ? filter : [filter]) : undefined,
   });
 
   return {

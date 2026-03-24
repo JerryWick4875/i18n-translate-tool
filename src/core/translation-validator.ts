@@ -12,6 +12,7 @@ import {
   MappingEntry,
 } from '../types';
 import { normalizePath } from '../utils/file-utils';
+import { filterFilesByGlob } from '../utils/filter-utils';
 
 /**
  * 翻译验证器
@@ -241,23 +242,18 @@ export class TranslationValidator {
    * 扫描本地文件
    */
   private async scanLocalFiles(): Promise<LocaleFile[]> {
-    const files = await this.scanner.scan(this.config.scanPatterns);
-
-    // 加载文件内容
-    const loadedFiles = await this.yamlHandler.loadFiles(files);
+    let files = await this.scanner.scan(this.config.scanPatterns);
 
     // 应用过滤器
     if (this.filter) {
-      // 支持多个 filter
       const filters = Array.isArray(this.filter)
         ? this.filter
         : [this.filter];
-
-      return loadedFiles.filter(f => {
-        const relativeDir = path.dirname(f.relativePath);
-        return filters.some(filter => relativeDir.startsWith(path.normalize(filter)));
-      });
+      files = await filterFilesByGlob(files, filters, this.basePath);
     }
+
+    // 加载文件内容
+    const loadedFiles = await this.yamlHandler.loadFiles(files);
 
     return loadedFiles;
   }

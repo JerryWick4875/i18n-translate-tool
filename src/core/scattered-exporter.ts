@@ -82,11 +82,27 @@ export class ScatteredExporter {
   /**
    * 扫描文件
    */
-  private async scanFiles(patterns: string[], language: string): Promise<LocaleFile[]> {
+  private async scanFiles(patterns: string[], language: string, filterPatterns?: string[]): Promise<LocaleFile[]> {
     const scanner = new LocaleScanner(this.basePath, []);
 
     // 扫描所有文件
-    const allFiles = await scanner.scan(patterns);
+    let allFiles = await scanner.scan(patterns);
+
+    // 如果有 filter，取 glob 交集
+    if (filterPatterns && filterPatterns.length > 0) {
+      const filterPaths = new Set<string>();
+      for (const filterPattern of filterPatterns) {
+        // 直接使用 glob 库，不通过 LocaleScanner
+        const { glob } = await import('glob');
+        const absolutePattern = path.isAbsolute(filterPattern)
+          ? filterPattern
+          : path.join(this.basePath, filterPattern);
+        const matches = await glob(absolutePattern, { absolute: true, nodir: true });
+        matches.forEach(m => filterPaths.add(m));
+      }
+      // 只保留在 filter 结果中的文件
+      allFiles = allFiles.filter(f => filterPaths.has(f.path));
+    }
 
     // 过滤出指定语言的文件
     const languageFiles = allFiles.filter(file => file.language === language);
@@ -105,6 +121,7 @@ export class ScatteredExporter {
     baseLanguage: string;
     targetLanguage: string;
     outputPath: string;
+    filterPatterns?: string[];
   }): Promise<ScatteredExportResult> {
     // 初始化 locale 替换模式
     this.initLocaleReplacePattern(options.scanPatterns);
@@ -113,11 +130,11 @@ export class ScatteredExporter {
 
     // 1. 扫描基础语言和目标语言文件
     this.logger.verboseLog(`  扫描基础语言: ${options.baseLanguage}`);
-    const baseFiles = await this.scanFiles(options.scanPatterns, options.baseLanguage);
+    const baseFiles = await this.scanFiles(options.scanPatterns, options.baseLanguage, options.filterPatterns);
     this.logger.verboseLog(`  找到 ${baseFiles.length} 个基础语言文件`);
 
     this.logger.verboseLog(`  扫描目标语言: ${options.targetLanguage}`);
-    const targetFiles = await this.scanFiles(options.scanPatterns, options.targetLanguage);
+    const targetFiles = await this.scanFiles(options.scanPatterns, options.targetLanguage, options.filterPatterns);
     this.logger.verboseLog(`  找到 ${targetFiles.length} 个目标语言文件`);
 
     // 2. 提取需要翻译的 key

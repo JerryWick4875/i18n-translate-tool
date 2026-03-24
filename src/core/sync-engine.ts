@@ -7,6 +7,7 @@ import { SnapshotManager } from './snapshot-manager';
 import { DiffEngine } from './diff-engine';
 import { Logger } from '../utils/logger';
 import { getRelativePath } from '../utils/file-utils';
+import { filterFilesByGlob } from '../utils/filter-utils';
 
 /**
  * 主同步引擎，用于编排同步工作流
@@ -53,15 +54,11 @@ export class SyncEngine {
     let allFiles = await this.scanner.scan(scanPatterns);
 
     if (this.options.filter) {
-      // 支持多个 filter
       const filters = Array.isArray(this.options.filter)
         ? this.options.filter
         : [this.options.filter];
 
-      allFiles = allFiles.filter(f => {
-        const relativeDir = path.dirname(f.relativePath);
-        return filters.some(filter => relativeDir.startsWith(path.normalize(filter)));
-      });
+      allFiles = await filterFilesByGlob(allFiles, filters, this.options.basePath);
       if (allFiles.length === 0) {
         this.logger.warn(`No files found matching filters: ${filters.join(', ')}`);
         return result;

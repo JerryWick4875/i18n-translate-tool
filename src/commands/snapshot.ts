@@ -5,6 +5,7 @@ import { YamlHandler } from '../core/yaml-handler';
 import { loadConfig } from '../config/config-loader';
 import { Logger } from '../utils/logger';
 import { LocaleFile } from '../types';
+import { filterFilesByGlob } from '../utils/filter-utils';
 import * as path from 'path';
 
 export const command = new Command('snapshot')
@@ -29,15 +30,11 @@ export const command = new Command('snapshot')
       let files = await scanner.scan(config.scanPatterns);
 
       if (options.filter) {
-        // 支持多个 filter
         const filters = Array.isArray(options.filter)
           ? options.filter
           : [options.filter];
 
-        files = files.filter(f => {
-          const relativeDir = path.dirname(f.relativePath);
-          return filters.some((filter: string) => relativeDir.startsWith(path.normalize(filter)));
-        });
+        files = await filterFilesByGlob(files, filters, basePath);
         if (files.length === 0) {
           logger.warn(`未找到匹配过滤条件的文件: ${filters.join(', ')}`);
           return;

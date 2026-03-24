@@ -9,6 +9,7 @@ const TEST_GROUPS = {
   ],
   snapshot: [
     'case-1-snapshot-basic',
+    'case-2-filter',
   ],
   sync: [
     'case-1-sync-new-keys',
@@ -28,6 +29,7 @@ const TEST_GROUPS = {
     'case-4-ignore-values',
     'case-5-one-time-mode',
     'case-6-custom-output',
+    'case-7-filter',
   ],
   submit: [
     'case-2-submit-deduplication',
@@ -37,11 +39,13 @@ const TEST_GROUPS = {
     'case-1-pull-basic',
     'case-2-pull-deduplication',
     'case-3-pull-primary-key-empty',
+    'case-4-filter',
   ],
   'export-scattered': [
     'case-1-export-basic',
     'case-2-locale-in-directory',
     'case-3-root-locale-file',
+    'case-4-filter',
   ],
   'import-scattered': [
     'case-1-import-basic',

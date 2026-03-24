@@ -12,6 +12,7 @@ import { LocaleScanner } from './scanner';
 import { YamlHandler } from './yaml-handler';
 import { Logger } from '../utils/logger';
 import { getRelativePath, normalizePath } from '../utils/file-utils';
+import { filterFilesByGlob } from '../utils/filter-utils';
 
 interface EmptyKeyInfo {
   file: LocaleFile;
@@ -149,15 +150,11 @@ export class ReuseEngine {
     let allFiles = await this.scanner.scan(scanPatterns);
 
     if (this.options.filter) {
-      // 支持多个 filter
       const filters = Array.isArray(this.options.filter)
         ? this.options.filter
         : [this.options.filter];
 
-      allFiles = allFiles.filter(f => {
-        const relativeDir = path.dirname(f.relativePath);
-        return filters.some(filter => relativeDir.startsWith(path.normalize(filter)));
-      });
+      allFiles = await filterFilesByGlob(allFiles, filters, this.options.basePath);
       if (allFiles.length === 0) {
         this.logger.warn(`No files found matching filters: ${filters.join(', ')}`);
         return {
