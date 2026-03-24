@@ -22,11 +22,51 @@ export class ScatteredImporter {
   private logger: Logger;
   private basePath: string;
   private yamlHandler: YamlHandler;
+  private localeReplacePattern: RegExp | null = null;
 
   constructor(logger: Logger, basePath: string = process.cwd()) {
     this.logger = logger;
     this.basePath = basePath;
     this.yamlHandler = new YamlHandler();
+  }
+
+  /**
+   * 初始化 locale 替换模式
+   * 根据 scanPatterns 中 (* as locale) 的位置，构建用于替换语言代码的正则表达式
+   */
+  private initLocaleReplacePattern(scanPatterns: string[]): void {
+    for (const pattern of scanPatterns) {
+      // 查找 (* as locale) 在 pattern 中的位置
+      const localeMatch = pattern.match(/\(\*\s+as\s+locale\)/);
+      if (!localeMatch) continue;
+
+      const localeIndex = localeMatch.index!;
+      const beforeLocale = pattern.slice(0, localeIndex);
+      const afterLocale = pattern.slice(localeIndex + localeMatch[0].length);
+
+      // 根据 locale 前后的内容决定使用哪种正则模式：
+      // - 如果 beforeLocale 为空，说明是根文件: (* as locale).yml
+      // - 如果 afterLocale 是 .yml 且没有 /，说明是文件名: xxx/(* as locale).yml
+      // - 如果 afterLocale 以 / 开头，说明是目录: xxx/(* as locale)/xxx
+      if (beforeLocale === '' && afterLocale === '.yml') {
+        // 根文件格式: (* as locale).yml
+        this.localeReplacePattern = /^([a-z]{2}-[A-Z]{2})\.yml$/;
+      } else if (afterLocale.endsWith('.yml') && !afterLocale.includes('/')) {
+        // 文件名格式: xxx/(* as locale).yml
+        this.localeReplacePattern = /\/([a-z]{2}-[A-Z]{2})\.yml$/;
+      } else if (afterLocale.startsWith('/')) {
+        // 目录格式: xxx/(* as locale)/xxx
+        this.localeReplacePattern = /\/([a-z]{2}-[A-Z]{2})\//;
+      } else {
+        // 其他格式，尝试通用匹配
+        this.localeReplacePattern = /\/([a-z]{2}-[A-Z]{2})(\/|\.yml$)/;
+      }
+
+      return;
+    }
+
+    // 如果没有找到 (* as locale)，使用默认模式
+    this.localeReplacePattern = /\/([a-z]{2}-[A-Z]{2})\//;
   }
 
   /**
@@ -57,6 +97,9 @@ export class ScatteredImporter {
     targetLanguage: string;
     dryRun?: boolean;
   }): Promise<{ updatedCount: number; fileCount: number }> {
+    // 初始化 locale 替换模式
+    this.initLocaleReplacePattern(options.scanPatterns);
+
     this.logger.verboseLog('\n📥 开始导入零散翻译文件...');
 
     // 1. 解析输入文件
@@ -299,10 +342,27 @@ export class ScatteredImporter {
 
   /**
    * 标准化文件路径，将语言代码替换为占位符以便匹配
-   * 例如: app/shop/locales/zh-CN.yml → app/shop/locales/{locale}.yml
+   * 根据 scanPatterns 中 (* as locale) 的位置动态处理
    */
   private normalizeFilePath(filePath: string): string {
-    // 匹配类似 zh-CN, en-US 这样的语言代码
-    return filePath.replace(/\/([a-z]{2}-[A-Z]{2})\.yml$/, '/{locale}.yml');
+    if (!this.localeReplacePattern) {
+      return filePath;
+    }
+
+    // 使用初始化好的模式替换语言代码
+    // 根据匹配的模式决定替换格式
+    return filePath.replace(this.localeReplacePattern, (match, locale, suffix) => {
+      // 检查是否是根文件格式（路径中没有 /）
+      if (!filePath.includes('/')) {
+        // 根文件: zh-CN.yml -> {locale}.yml
+        return '{locale}.yml';
+      }
+      // suffix 可能是 '/' 或 '.yml'
+      if (suffix === '.yml') {
+        return '/{locale}.yml';
+      } else {
+        return '/{locale}/';
+      }
+    });
   }
 }
