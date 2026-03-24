@@ -8,7 +8,7 @@ export const command = program
   .description('导出零散翻译文件：提取需要翻译的 key，生成包含 keys 和基础语言内容的文件')
   .option('-o, --output <path>', '输出文件路径', '.scattered-translations.txt')
   .option('-t, --target <lang>', '目标语言代码')
-  .option('--filter <pattern>', '过滤特定目录')
+  .option('--filter <patterns...>', '过滤特定目录（可多个）')
   .option('-c, --config <path>', '配置文件路径')
   .option('-v, --verbose', '详细输出')
   .action(async (options) => {
@@ -17,7 +17,8 @@ export const command = program
       logger.info('📤 导出零散翻译文件\n');
 
       // 加载配置
-      const config = await loadConfig(options.config);
+      const cwd = process.cwd();
+      const config = await loadConfig(cwd, options.config);
 
       // 确定目标语言
       const targetLanguage = options.target || config.defaultTarget;
@@ -28,19 +29,23 @@ export const command = program
 
       // 应用过滤
       let scanPatterns = config.scanPatterns;
-      if (options.filter) {
-        scanPatterns = scanPatterns.map((pattern: string) => {
-          // 将 filter 插入到模式中
-          const parts = pattern.split('/locales/');
-          if (parts.length === 2) {
-            return `${parts[0]}/${options.filter}/locales/${parts[1]}`;
+      if (options.filter && options.filter.length > 0) {
+        // 支持多个 filter，每个 filter 都应用到所有 scanPattern 上
+        const filteredPatterns: string[] = [];
+        for (const filter of options.filter) {
+          for (const pattern of scanPatterns) {
+            // 将第一个命名通配符替换为 filter
+            // 例如: app/(* as app)/locales/*.yml + shop -> app/shop/locales/*.yml
+            // 例如: (* as dir)/locales/*.yml + shop -> shop/locales/*.yml
+            const filtered = pattern.replace(/\(\*\s+as\s+[^)]+\)/, filter);
+            filteredPatterns.push(filtered);
           }
-          return pattern;
-        });
+        }
+        scanPatterns = filteredPatterns;
       }
 
       // 创建导出器并执行
-      const exporter = new ScatteredExporter(logger);
+      const exporter = new ScatteredExporter(logger, cwd);
       const result = await exporter.export({
         scanPatterns,
         baseLanguage: config.baseLanguage,

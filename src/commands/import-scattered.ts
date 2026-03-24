@@ -24,7 +24,8 @@ export const command = program
       }
 
       // 加载配置
-      const config = await loadConfig(options.config);
+      const cwd = process.cwd();
+      const config = await loadConfig(cwd, options.config);
 
       // 确定目标语言
       const targetLanguage = options.target || config.defaultTarget;
@@ -34,7 +35,7 @@ export const command = program
       }
 
       // 创建导入器并执行
-      const importer = new ScatteredImporter(logger);
+      const importer = new ScatteredImporter(logger, cwd);
       const result = await importer.import({
         inputPath: options.input,
         scanPatterns: config.scanPatterns,
