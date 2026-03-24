@@ -45,6 +45,13 @@ module.exports = {
     ],
   },
 
+  // ==================== 零散翻译功能配置 ====================
+  scattered: {
+    // 零散翻译文件输出路径（相对于项目根目录）
+    // 用于 export-scattered 和 import-scattered 命令
+    outputFile: '.scattered-translations.txt',
+  },
+
   submission: {
     // 提取文件输出目录（相对于项目根目录）
     outputDir: 'i18n-translate-submission',
