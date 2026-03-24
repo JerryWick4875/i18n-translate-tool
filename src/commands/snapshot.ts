@@ -84,8 +84,14 @@ export const command = new Command('snapshot')
           logger.dryRun(`将创建快照: ${snapshotPath}`);
           logger.info(`文件: ${baseData.size}, 键数: ${Array.from(baseData.values()).reduce((sum, obj) => sum + Object.keys(obj).length, 0)}`);
         } else {
-          await snapshotManager.createSnapshot(group, target, baseData, variables);
-          logger.success(`快照已创建: ${target} for ${group}`);
+          // 有 filter 时使用 mergeSnapshot，保留其他文件的快照数据
+          if (options.filter) {
+            await snapshotManager.mergeSnapshot(group, target, baseData, variables);
+            logger.success(`快照已合并: ${target} for ${group}`);
+          } else {
+            await snapshotManager.createSnapshot(group, target, baseData, variables);
+            logger.success(`快照已创建: ${target} for ${group}`);
+          }
         }
       }
 

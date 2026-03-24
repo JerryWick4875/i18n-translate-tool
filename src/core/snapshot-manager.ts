@@ -77,6 +77,43 @@ export class SnapshotManager {
   }
 
   /**
+   * 合并快照（用于 filter 场景）
+   * 只更新指定的文件，保留快照中其他文件的数据
+   */
+  async mergeSnapshot(
+    app: string,
+    targetLanguage: string,
+    baseLanguageData: Map<string, Record<string, string>>,
+    variables: Record<string, string> = {}
+  ): Promise<void> {
+    const snapshotPath = this.getSnapshotPath(app, targetLanguage, variables);
+    await ensureDir(path.dirname(snapshotPath));
+
+    // 读取现有快照（如果存在）
+    let snapshotData: SnapshotData = {};
+    if (await fileExists(snapshotPath)) {
+      const existingContent = await fs.readFile(snapshotPath, 'utf-8');
+      snapshotData = yaml.load(existingContent) as SnapshotData || {};
+    }
+
+    // 合并新数据
+    for (const [filePath, content] of baseLanguageData) {
+      // 规范化路径为正斜杠（跨平台兼容）
+      snapshotData[normalizePath(filePath)] = { ...content };
+    }
+
+    const yamlContent = yaml.dump(snapshotData, {
+      indent: 2,
+      lineWidth: -1,
+      noRefs: true,
+      sortKeys: false,
+      quotingType: '"',
+      forceQuotes: false,
+    });
+    await fs.writeFile(snapshotPath, yamlContent, 'utf-8');
+  }
+
+  /**
    * 读取现有快照
    */
   async readSnapshot(

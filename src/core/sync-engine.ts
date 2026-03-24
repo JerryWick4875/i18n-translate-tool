@@ -185,13 +185,24 @@ export class SyncEngine {
 
       // 无论是否有变化，都更新快照以反映当前基础语言的完整状态
       if (!this.options.dryRun) {
-        await this.snapshotManager.createSnapshot(
-          app,
-          this.options.target,
-          this.prepareSnapshotMap(baseFiles),
-          variables
-        );
-        this.logger.success(`Snapshot updated.`);
+        // 有 filter 时使用 mergeSnapshot，保留其他文件的快照数据
+        if (this.options.filter) {
+          await this.snapshotManager.mergeSnapshot(
+            app,
+            this.options.target,
+            this.prepareSnapshotMap(baseFiles),
+            variables
+          );
+          this.logger.success(`Snapshot merged (filter mode).`);
+        } else {
+          await this.snapshotManager.createSnapshot(
+            app,
+            this.options.target,
+            this.prepareSnapshotMap(baseFiles),
+            variables
+          );
+          this.logger.success(`Snapshot updated.`);
+        }
       }
     }
 
