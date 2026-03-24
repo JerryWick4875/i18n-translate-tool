@@ -211,7 +211,7 @@ async function runExportScattered(
     scanPatterns,
     baseLanguage: config.baseLanguage,
     targetLanguage: target,
-    outputPath: outputPath || '.scattered-translations.txt',
+    outputPath: outputPath || config.scattered?.outputFile || '.scattered-translations.txt',
   });
 
   return {

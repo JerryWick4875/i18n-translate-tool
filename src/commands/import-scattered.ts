@@ -7,7 +7,7 @@ import * as fs from 'fs';
 export const command = program
   .command('import-scattered')
   .description('导入零散翻译文件：读取翻译后的文件，将目标语言内容填回对应的 key')
-  .option('-i, --input <path>', '输入文件路径', '.scattered-translations.txt')
+  .option('-i, --input <path>', '输入文件路径')
   .option('-t, --target <lang>', '目标语言代码')
   .option('--dry-run', '预览模式，不实际修改文件')
   .option('-c, --config <path>', '配置文件路径')
@@ -17,15 +17,18 @@ export const command = program
     try {
       logger.info('📥 导入零散翻译文件\n');
 
-      // 检查输入文件是否存在
-      if (!fs.existsSync(options.input)) {
-        logger.error(`❌ 错误: 找不到输入文件 ${options.input}`);
-        process.exit(1);
-      }
-
       // 加载配置
       const cwd = process.cwd();
       const config = await loadConfig(cwd, options.config);
+
+      // 确定输入文件路径
+      const inputPath = options.input || config.scattered?.outputFile || '.scattered-translations.txt';
+
+      // 检查输入文件是否存在
+      if (!fs.existsSync(inputPath)) {
+        logger.error(`❌ 错误: 找不到输入文件 ${inputPath}`);
+        process.exit(1);
+      }
 
       // 确定目标语言
       const targetLanguage = options.target || config.defaultTarget;
@@ -37,7 +40,7 @@ export const command = program
       // 创建导入器并执行
       const importer = new ScatteredImporter(logger, cwd);
       const result = await importer.import({
-        inputPath: options.input,
+        inputPath,
         scanPatterns: config.scanPatterns,
         baseLanguage: config.baseLanguage,
         targetLanguage,

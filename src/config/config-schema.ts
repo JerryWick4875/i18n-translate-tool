@@ -26,6 +26,13 @@ const ReuseConfigSchema = z.object({
 }).strict();
 
 /**
+ * 零散翻译配置 Schema
+ */
+const ScatteredConfigSchema = z.object({
+  outputFile: z.string().optional(),
+}).strict();
+
+/**
  * 去重配置 Schema
  */
 const DeduplicationConfigSchema = z.object({
@@ -95,6 +102,7 @@ export const I18nConfigSchema = z.object({
   outputFormat: OutputFormatConfigSchema.optional(),
   snapshot: SnapshotConfigSchema.optional(),
   reuse: ReuseConfigSchema.optional(),
+  scattered: ScatteredConfigSchema.optional(),
   submission: SubmissionConfigSchema.optional(),
 }).strict();
 

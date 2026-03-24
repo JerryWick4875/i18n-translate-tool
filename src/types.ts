@@ -23,6 +23,11 @@ export interface I18nConfig {
     ignoreValues?: string[];
   };
 
+  // 零散翻译功能配置
+  scattered?: {
+    outputFile?: string;
+  };
+
   // 提交功能配置
   submission?: {
     outputDir?: string;

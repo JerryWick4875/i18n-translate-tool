@@ -50,7 +50,7 @@ export const command = program
         scanPatterns,
         baseLanguage: config.baseLanguage,
         targetLanguage,
-        outputPath: options.output,
+        outputPath: options.output || config.scattered?.outputFile,
       });
 
       logger.info(`\n✅ 导出完成:`);
