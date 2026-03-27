@@ -51,6 +51,10 @@ const TEST_GROUPS = {
   'import-scattered': [
     'case-1-import-basic',
   ],
+  'auto-submit': [
+    'case-1-preview',
+    'case-2-abort',
+  ],
 };
 
 export async function runAllTests() {

@@ -322,3 +322,21 @@ export interface RemoteFile {
   content: Record<string, string>;
   language: string;
 }
+
+/**
+ * auto-submit 预览状态文件
+ * 用于在 --preview 和 --continue 之间传递状态
+ */
+export interface AutoSubmitState {
+  version: string; // 状态文件版本，用于格式变更检查
+  configPath: string; // 配置文件路径
+  basePath: string; // 基础路径
+  target: string; // 目标语言
+  filter?: string[]; // 过滤器
+  outputDir: string; // 输出目录
+  branchName: string; // GitLab 分支名
+  xanaduProjectId?: string; // Xanadu 项目 ID（使用已有项目）
+  createXanaduProjectName?: string; // Xanadu 项目名称（创建新项目）
+  productId?: string; // 产品 ID
+  createdAt: string; // 创建时间
+}
