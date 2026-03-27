@@ -3,6 +3,7 @@ module.exports = {
   scanPatterns: ['app/(* as app)/config/locales/(* as locale)/*.yml'],
   snapshot: {
     dir: 'i18n-translate-snapshot',
+  pathPattern: '{app}/{locale}.yml',
   },
   reuse: {
     outputFile: '.i18ntool-reuse.yml',

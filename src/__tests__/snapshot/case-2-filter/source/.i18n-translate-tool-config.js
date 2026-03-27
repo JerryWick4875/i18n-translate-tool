@@ -6,4 +6,7 @@ module.exports = {
     dir: 'i18n-translate-snapshot',
     pathPattern: '{app}/{locale}.yml',
   },
+  reuse: {
+    outputFile: '.i18n-translate-tool-reuse.yml',
+  },
 };

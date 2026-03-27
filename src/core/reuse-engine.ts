@@ -142,7 +142,6 @@ export class ReuseEngine {
     skipFileWrite = false
   ): Promise<ReuseSuggestionsData> {
     const targetLanguage = this.options.target;
-    const outputFilePath = this.resolveOutputPath(outputPath || this.options.outputPath || '.i18ntool-reuse.yml');
 
     this.logger.section(`\n🔍 扫描 ${targetLanguage} 中的空翻译...`);
 
@@ -250,6 +249,13 @@ export class ReuseEngine {
       this.logger.verboseLog('\nℹ️  跳过建议文件生成（一键模式）');
       return data;
     }
+
+    // 解析输出路径
+    const finalOutputPath = outputPath || this.options.outputPath;
+    if (!finalOutputPath) {
+      throw new Error('输出路径未指定，请在配置中设置 reuse.outputFile 或使用 --output 选项');
+    }
+    const outputFilePath = this.resolveOutputPath(finalOutputPath);
 
     if (!this.options.dryRun) {
       // 检查文件是否存在

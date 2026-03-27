@@ -35,10 +35,7 @@ export const command = new Command('submit-gitlab')
       const target = options.target || config.defaultTarget || 'en-US';
 
       // 获取输出目录
-      const outputDir = path.join(
-        basePath,
-        config.submission?.outputDir || 'i18n-translate-submission'
-      );
+      const outputDir = path.join(basePath, config.submission!.outputDir!);
 
       // 检查是否需要提取
       const outputDirExists = await fileExists(outputDir);

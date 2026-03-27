@@ -28,8 +28,8 @@ export const command = new Command('reuse')
       const target = options.target || config.defaultTarget || 'en-US';
 
       // 确定输出/输入文件路径
-      const outputPath = options.output || config.reuse?.outputFile || '.i18ntool-reuse.yml';
-      const inputPath = options.input || config.reuse?.outputFile || '.i18ntool-reuse.yml';
+      const outputPath = options.output || config.reuse?.outputFile;
+      const inputPath = options.input || config.reuse?.outputFile;
 
       const reuseEngine = new ReuseEngine(
         {

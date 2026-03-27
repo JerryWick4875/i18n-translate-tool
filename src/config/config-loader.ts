@@ -139,15 +139,15 @@ function mergeConfig(
       indent: userConfig.outputFormat?.indent || defaults.outputFormat?.indent,
     },
 
-    // 快照配置
+    // 快照配置（必填）
     snapshot: {
-      dir: userConfig.snapshot?.dir || defaults.snapshot?.dir,
-      pathPattern: userConfig.snapshot?.pathPattern || defaults.snapshot?.pathPattern,
+      dir: userConfig.snapshot?.dir!,
+      pathPattern: userConfig.snapshot?.pathPattern!,
     },
 
-    // 翻译复用配置
+    // 翻译复用配置（必填）
     reuse: {
-      outputFile: userConfig.reuse?.outputFile || defaults.reuse?.outputFile,
+      outputFile: userConfig.reuse?.outputFile!,
       ignoreValues: userConfig.reuse?.ignoreValues ?? defaults.reuse?.ignoreValues,
     },
 

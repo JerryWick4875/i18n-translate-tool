@@ -185,11 +185,11 @@ async function runSync(
       verbose: logger.isVerbose(),
       dryRun: false,
     },
-    config.snapshot?.pathPattern || '{app}/{locale}.yml',
+    config.snapshot.pathPattern,
     logger
   );
 
-  const snapshotDir = path.join(basePath, config.snapshot?.dir || 'i18n-translate-snapshot');
+  const snapshotDir = path.join(basePath, config.snapshot.dir);
 
   const result = await syncEngine.sync(
     config.scanPatterns,
@@ -262,7 +262,7 @@ async function runSubmitGitlab(
   logger.success('GitLab 访问权限验证成功');
 
   // 确定输出目录
-  const outputDir = path.join(basePath, config.submission?.outputDir || 'i18n-translate-submission');
+  const outputDir = path.join(basePath, config.submission!.outputDir!);
 
   // 清空输出目录（如果存在）
   logger.info(`清空输出目录: ${outputDir}`);

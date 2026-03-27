@@ -127,11 +127,11 @@ async function runSync(
       verbose: logger.isVerbose(),
       dryRun: false,
     },
-    config.snapshot?.pathPattern || '{app}/{locale}.yml',
+    config.snapshot.pathPattern,
     logger
   );
 
-  const snapshotDir = path.join(basePath, config.snapshot?.dir || 'i18n-translate-snapshot');
+  const snapshotDir = path.join(basePath, config.snapshot.dir);
 
   const result = await syncEngine.sync(
     config.scanPatterns,

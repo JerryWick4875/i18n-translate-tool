@@ -32,11 +32,11 @@ export const command = new Command('sync')
           verbose: options.verbose,
           dryRun: options.dryRun,
         },
-        config.snapshot?.pathPattern || '{app}/{locale}.yml',
+        config.snapshot.pathPattern,
         logger
       );
 
-      const snapshotDir = path.join(basePath, config.snapshot?.dir || 'i18n-translate-snapshot');
+      const snapshotDir = path.join(basePath, config.snapshot.dir);
 
       const result = await syncEngine.sync(
         config.scanPatterns,

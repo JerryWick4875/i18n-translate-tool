@@ -13,15 +13,15 @@ const OutputFormatConfigSchema = z.object({
  * 快照配置 Schema
  */
 const SnapshotConfigSchema = z.object({
-  dir: z.string().min(1).optional(),
-  pathPattern: z.string().optional(),
+  dir: z.string().min(1),
+  pathPattern: z.string().min(1),
 }).strict();
 
 /**
  * 翻译复用配置 Schema
  */
 const ReuseConfigSchema = z.object({
-  outputFile: z.string().optional(),
+  outputFile: z.string().min(1),
   ignoreValues: z.array(z.string()).optional(),
 }).strict();
 
@@ -100,8 +100,8 @@ export const I18nConfigSchema = z.object({
 
   // 功能配置
   outputFormat: OutputFormatConfigSchema.optional(),
-  snapshot: SnapshotConfigSchema.optional(),
-  reuse: ReuseConfigSchema.optional(),
+  snapshot: SnapshotConfigSchema,
+  reuse: ReuseConfigSchema,
   scattered: ScatteredConfigSchema.optional(),
   submission: SubmissionConfigSchema.optional(),
 }).strict();

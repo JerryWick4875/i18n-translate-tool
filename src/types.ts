@@ -11,15 +11,15 @@ export interface I18nConfig {
     indent?: number;
   };
 
-  // 快照功能配置
-  snapshot?: {
-    dir?: string;
-    pathPattern?: string;
+  // 快照功能配置（必填）
+  snapshot: {
+    dir: string;
+    pathPattern: string;
   };
 
-  // 翻译复用功能配置
-  reuse?: {
-    outputFile?: string;
+  // 翻译复用功能配置（必填）
+  reuse: {
+    outputFile: string;
     ignoreValues?: string[];
   };
 

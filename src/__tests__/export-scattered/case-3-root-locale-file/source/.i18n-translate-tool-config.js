@@ -4,4 +4,7 @@ module.exports = {
   scanPatterns: [
     '(* as locale).yml',
   ],
+  reuse: {
+    outputFile: '.i18n-translate-tool-reuse.yml',
+  },
 };
